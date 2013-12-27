@@ -200,16 +200,5 @@
 
     return ([results count] > 0) ? results : nil;
 }
-/*
-+ (NSArray *)fetchWithPredicate:(NSPredicate *)predicate
-                      inContext:(NSManagedObjectContext *)context {
-    
-    NSFetchRequest *request = [self createFetchRequestInContext:context];
-    [request setPredicate:predicate];
-    
-    NSArray *fetchedObjects = [context executeFetchRequest:request error:nil];
-    return fetchedObjects.count > 0 ? fetchedObjects : nil;
-}
-*/
 
 @end

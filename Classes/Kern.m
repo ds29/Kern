@@ -128,7 +128,7 @@ static Kern *_sharedInstance = nil;
     }
 }
 
-+ (void)setupCoreDataStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName {
++ (void)setupAutoMigratingCoreDataStack {
 
     // setup our object model and persistent store
     NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:[self modelURL]];
@@ -157,7 +157,8 @@ static Kern *_sharedInstance = nil;
     _sharedInstance.managedObjectContext = context;
 }
 
-+ (void) setupCoreDataStackWithInMemoryStore {
++ (void)setupInMemoryStoreCoreDataStack {
+
     // setup our object model and persistent store
     NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:[self modelURL]];
     NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];

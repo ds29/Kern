@@ -57,8 +57,8 @@ extern NSString * const kKernDefaultStoreFileName;
 + (NSManagedObjectContext*)sharedContext;
 
 + (NSURL*)storeURL;
-+ (void)setupCoreDataStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName;
-+ (void)setupCoreDataStackWithInMemoryStore;
++ (void)setupAutoMigratingCoreDataStack;
++ (void)setupInMemoryStoreCoreDataStack;
 
 + (BOOL)saveContext;
 
