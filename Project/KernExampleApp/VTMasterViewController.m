@@ -55,7 +55,7 @@
     user.lastName = @"Guy";
     user.luckyNumber = [NSNumber numberWithInt:vt_randomIntInRange(1, 111)];
     
-    [user save];
+    [user saveEntity];
 }
 
 #pragma mark - Table View

@@ -13,6 +13,11 @@
 		AB7C93D8186CB08B00CBB08D /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB7C93D7186CB08B00CBB08D /* CoreData.framework */; };
 		AB7C93DD186CB13000CBB08D /* NSManagedObject+Kern.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93DA186CB13000CBB08D /* NSManagedObject+Kern.m */; };
 		AB7C93DE186CB13000CBB08D /* NSString+Kern.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93DC186CB13000CBB08D /* NSString+Kern.m */; };
+		AB7C93E518721DD500CBB08D /* NSManagedObject+Finders.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93E418721DD500CBB08D /* NSManagedObject+Finders.m */; };
+		AB7C93E818721E6700CBB08D /* NSManagedObject+Fetching.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93E718721E6700CBB08D /* NSManagedObject+Fetching.m */; };
+		AB7C93EB18721FC200CBB08D /* NSManagedObject+Aggregates.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93EA18721FC200CBB08D /* NSManagedObject+Aggregates.m */; };
+		AB7C93EE1872213900CBB08D /* NSManagedObject+DataMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93ED1872213900CBB08D /* NSManagedObject+DataMapping.m */; };
+		AB7C93F11872216B00CBB08D /* NSManagedObject+Modifiers.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93F01872216B00CBB08D /* NSManagedObject+Modifiers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,6 +44,16 @@
 		AB7C93DA186CB13000CBB08D /* NSManagedObject+Kern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Kern.m"; sourceTree = "<group>"; };
 		AB7C93DB186CB13000CBB08D /* NSString+Kern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Kern.h"; sourceTree = "<group>"; };
 		AB7C93DC186CB13000CBB08D /* NSString+Kern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Kern.m"; sourceTree = "<group>"; };
+		AB7C93E318721DD500CBB08D /* NSManagedObject+Finders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+Finders.h"; sourceTree = "<group>"; };
+		AB7C93E418721DD500CBB08D /* NSManagedObject+Finders.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Finders.m"; sourceTree = "<group>"; };
+		AB7C93E618721E6600CBB08D /* NSManagedObject+Fetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+Fetching.h"; sourceTree = "<group>"; };
+		AB7C93E718721E6700CBB08D /* NSManagedObject+Fetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Fetching.m"; sourceTree = "<group>"; };
+		AB7C93E918721FC200CBB08D /* NSManagedObject+Aggregates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+Aggregates.h"; sourceTree = "<group>"; };
+		AB7C93EA18721FC200CBB08D /* NSManagedObject+Aggregates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Aggregates.m"; sourceTree = "<group>"; };
+		AB7C93EC1872213900CBB08D /* NSManagedObject+DataMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+DataMapping.h"; sourceTree = "<group>"; };
+		AB7C93ED1872213900CBB08D /* NSManagedObject+DataMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+DataMapping.m"; sourceTree = "<group>"; };
+		AB7C93EF1872216B00CBB08D /* NSManagedObject+Modifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+Modifiers.h"; sourceTree = "<group>"; };
+		AB7C93F01872216B00CBB08D /* NSManagedObject+Modifiers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Modifiers.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +105,16 @@
 				AB7C93DA186CB13000CBB08D /* NSManagedObject+Kern.m */,
 				AB7C93DB186CB13000CBB08D /* NSString+Kern.h */,
 				AB7C93DC186CB13000CBB08D /* NSString+Kern.m */,
+				AB7C93E318721DD500CBB08D /* NSManagedObject+Finders.h */,
+				AB7C93E418721DD500CBB08D /* NSManagedObject+Finders.m */,
+				AB7C93E618721E6600CBB08D /* NSManagedObject+Fetching.h */,
+				AB7C93E718721E6700CBB08D /* NSManagedObject+Fetching.m */,
+				AB7C93E918721FC200CBB08D /* NSManagedObject+Aggregates.h */,
+				AB7C93EA18721FC200CBB08D /* NSManagedObject+Aggregates.m */,
+				AB7C93EC1872213900CBB08D /* NSManagedObject+DataMapping.h */,
+				AB7C93ED1872213900CBB08D /* NSManagedObject+DataMapping.m */,
+				AB7C93EF1872216B00CBB08D /* NSManagedObject+Modifiers.h */,
+				AB7C93F01872216B00CBB08D /* NSManagedObject+Modifiers.m */,
 			);
 			name = Kern;
 			path = ../Classes;
@@ -146,9 +171,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB7C93F11872216B00CBB08D /* NSManagedObject+Modifiers.m in Sources */,
 				AB7C93B9186CB05700CBB08D /* Kern.m in Sources */,
 				AB7C93DE186CB13000CBB08D /* NSString+Kern.m in Sources */,
+				AB7C93EE1872213900CBB08D /* NSManagedObject+DataMapping.m in Sources */,
 				AB7C93DD186CB13000CBB08D /* NSManagedObject+Kern.m in Sources */,
+				AB7C93E818721E6700CBB08D /* NSManagedObject+Fetching.m in Sources */,
+				AB7C93E518721DD500CBB08D /* NSManagedObject+Finders.m in Sources */,
+				AB7C93EB18721FC200CBB08D /* NSManagedObject+Aggregates.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

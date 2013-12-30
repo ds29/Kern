@@ -50,6 +50,7 @@
 #import "NSString+Kern.h"
 
 extern NSString * const kKernDefaultStoreFileName;
+#define kKernDefaultBatchSize 20
 
 @interface Kern : NSObject
 
@@ -61,5 +62,9 @@ extern NSString * const kKernDefaultStoreFileName;
 + (void)setupInMemoryStoreCoreDataStack;
 
 + (BOOL)saveContext;
+
++ (NSFetchRequest*)kern_fetchRequestForEntityName:(NSString*)entityName condition:(id)condition sort:(id)sort limit:(NSUInteger)limit;
++ (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest;
++ (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest;
 
 @end

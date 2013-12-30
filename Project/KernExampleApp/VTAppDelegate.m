@@ -18,12 +18,20 @@
     // Setup Kern
     [Kern setupAutoMigratingCoreDataStack];
 
-    User *u =  [User findByPrimaryKey:@42];
-    NSLog(@"found 42? %@", u);
-    User *u1 = [User findOrCreateByPrimaryKey:@42];
-    NSLog(@"found or created 42? %@", u1);
-    User *u2 = [User findOrCreateByPrimaryKey:@111];
-    NSLog(@"found or created 111? %@", u2);
+    User *u1 =  [User findByPrimaryKey:@42];
+
+    NSLog(@"found? %@ | %@", u1.firstName, u1.timeStamp);
+
+    [u1 updateEntity:@{@"firstName": @"Other", @"timeStamp": [NSDate date]}];
+
+    NSLog(@"updated? %@ | %@", u1.firstName, u1.timeStamp);
+
+    u1 = [User updateOrCreateEntityUsingRemoteDictionary:@{@"user": @{@"lucky_number": [NSNumber numberWithInt:42], @"first_name":@"Dustin", @"last_name":@"Steele", @"timestamp": @"2013-12-30T15:15:00Z"}}];
+    
+    NSLog(@"updated? %@ | %@", u1.firstName, u1.timeStamp);
+
+//    [u1 updateEntity:@{@"user": @{@"first_name":@"Dustin", @"last_name":@"Steele", @"timestamp": @"2013-12-30T15:15:00Z"}}];
+    
     
     [Kern saveContext];
     

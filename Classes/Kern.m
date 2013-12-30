@@ -19,13 +19,16 @@ static Kern *_sharedInstance = nil;
 @property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
-+(void)setupSharedInstance;
++ (void)setupSharedInstance;
 + (NSURL*)modelURL;
 + (NSString *)baseName;
 + (NSURL *)applicationDocumentsDirectory;
 + (void)createApplicationSupportDirIfNeeded;
 + (void)addAutoMigratingSqliteStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator;
 + (void)addInMemoryStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator;
+
++ (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest;
++ (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest;
 
 @end
 
@@ -197,6 +200,144 @@ static Kern *_sharedInstance = nil;
         return YES;
     }
     return NO;
+}
+   
+#pragma mark - Library Helpers
+
++ (NSFetchRequest*)kern_fetchRequestForEntityName:(NSString*)entityName condition:(id)condition sort:(id)sort limit:(NSUInteger)limit {
+    
+    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:entityName];
+    request.fetchBatchSize = kKernDefaultBatchSize;
+    
+    if (condition) {
+        request.predicate = [self kern_predicateFromConditional:condition];
+    }
+    
+    if (sort) {
+        [request setSortDescriptors:[self kern_sortDescriptorsFromObject:sort]];
+    }
+    
+    if (limit > 0) {
+        request.fetchLimit = limit;
+    }
+    
+    return request;
+    
+}
+   
++ (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest {
+   NSError *error = nil;
+   NSUInteger count = [[self sharedContext] countForFetchRequest:fetchRequest error:&error];
+   
+   if (error) {
+       [NSException raise:@"Unable to count for fetch request." format:@"Error: %@", error];
+   }
+   
+   return count;
+}
+
++ (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest {
+   NSError *error = nil;
+   NSArray *results = [[self sharedContext] executeFetchRequest:fetchRequest error:&error];
+   
+   if (error) {
+       [NSException raise:@"Unable to execute fetch request." format:@"Error: %@", error];
+   }
+   
+   return ([results count] > 0) ? results : nil;
+}
+
+#pragma mark - Private
+
++ (NSArray*)kern_sortDescriptorsFromString:(NSString*)sort {
+    
+    if (!sort || [sort isEmpty]) { return @[]; }
+    
+    NSString *trimmedSort = [sort stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters];
+    
+    NSMutableArray *sortDescriptors = [NSMutableArray array];
+    NSArray *sortPhrases = [trimmedSort componentsSeparatedByString:@","];
+    
+    for (NSString *phrase in sortPhrases) {
+        NSArray *parts = [[phrase stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters] componentsSeparatedByString:@" "];
+        
+        NSString *sortKey = [(NSString*)[parts firstObject] stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters];
+        
+        BOOL sortDescending = false;
+        
+        if ([parts count] == 2) {
+            NSString *sortDirection = [[[parts lastObject] stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters] lowercaseString];
+            
+            sortDescending = [sortDirection isEqualToString:@"desc"];
+        }
+        
+        [sortDescriptors addObject:[NSSortDescriptor sortDescriptorWithKey:sortKey ascending:!sortDescending]];
+    }
+    return sortDescriptors;
+}
+
++ (NSSortDescriptor *)kern_sortDescriptorFromDictionary:(NSDictionary *)dict {
+    NSString *value = [[dict.allValues objectAtIndex:0] uppercaseString];
+    NSString *key = [dict.allKeys objectAtIndex:0];
+    BOOL isAscending = ![value isEqualToString:@"DESC"];
+    return [NSSortDescriptor sortDescriptorWithKey:key ascending:isAscending];
+}
+
++ (NSSortDescriptor *)kern_sortDescriptorFromObject:(id)order {
+    if ([order isKindOfClass:[NSSortDescriptor class]])
+        return order;
+    
+    else if ([order isKindOfClass:[NSString class]])
+        return [NSSortDescriptor sortDescriptorWithKey:order ascending:YES];
+    
+    else if ([order isKindOfClass:[NSDictionary class]])
+        return [self kern_sortDescriptorFromDictionary:order];
+    
+    return nil;
+}
+
++ (NSArray *)kern_sortDescriptorsFromObject:(id)order {
+    // if it's a comma separated string, use our method to parse it
+    if ([order isKindOfClass:[NSString class]] && ([order containsString:@","] || [order containsString:@" "])) {
+        return [self kern_sortDescriptorsFromString:order];
+    }
+    else if ([order isKindOfClass:[NSArray class]]) {
+        NSMutableArray *results = [NSMutableArray array];
+        for (id object in order) {
+            [results addObject:[self kern_sortDescriptorFromObject:object]];
+        }
+        return results;
+    }
+    else
+        return @[[self kern_sortDescriptorFromObject:order]];
+}
+
++ (NSPredicate*)kern_predicateFromConditional:(id)condition {
+    
+    if (condition) {
+        if ([condition isKindOfClass:[NSPredicate class]]) { //any kind of predicate?
+            return condition;
+        }
+        else if ([condition isKindOfClass:[NSString class]]) {
+            return [NSPredicate predicateWithFormat:condition];
+        }
+        else if ([condition isKindOfClass:[NSDictionary class]]) {
+            // if it's empty or not provided return nil
+            if (!condition || [condition count] == 0) { return nil; }
+            
+            
+            NSMutableArray *subpredicates = [NSMutableArray array];
+            for (id key in [condition allKeys]) {
+                id value = [condition valueForKey:key];
+                [subpredicates addObject:[NSPredicate predicateWithFormat:@"%K == %@", key, value]];
+            }
+            
+            return [NSCompoundPredicate andPredicateWithSubpredicates:subpredicates];        }
+        
+        [NSException raise:@"Invalid conditional." format:nil];
+    }
+    
+    return nil;
 }
 
 @end
