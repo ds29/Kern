@@ -39,6 +39,9 @@
 
 - (void)insertNewObject:(id)sender
 {
+    User *user = [User createEntity];
+
+/*
     NSManagedObjectContext *context = [self.fetchedResultsController managedObjectContext];
     NSEntityDescription *entity = [[self.fetchedResultsController fetchRequest] entity];
     NSManagedObject *newManagedObject = [NSEntityDescription insertNewObjectForEntityForName:[entity name] inManagedObjectContext:context];
@@ -46,12 +49,13 @@
     // If appropriate, configure the new managed object.
     // Normally you should use accessor methods, but using KVC here avoids the need to add a custom class to the template.
     User *user = (User*)newManagedObject;
+    */
     user.timeStamp = [NSDate date];
     user.firstName = @"This";
     user.lastName = @"Guy";
     user.luckyNumber = [NSNumber numberWithInt:vt_randomIntInRange(1, 111)];
     
-    [Kern saveContext];
+    [user save];
 }
 
 #pragma mark - Table View
@@ -119,7 +123,10 @@
         return _fetchedResultsController;
     }
     
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    self.fetchedResultsController = [User fetchAllSortedBy:@"timeStamp desc"];
+    _fetchedResultsController.delegate = self;
+    
+/*    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     // Edit the entity name as appropriate.
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
@@ -138,7 +145,8 @@
     NSFetchedResultsController *aFetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:self.managedObjectContext sectionNameKeyPath:nil cacheName:@"Master"];
     aFetchedResultsController.delegate = self;
     self.fetchedResultsController = aFetchedResultsController;
-    
+
+    */
 	NSError *error = nil;
 	if (![self.fetchedResultsController performFetch:&error]) {
 	     // Replace this implementation with code to handle the error appropriately.

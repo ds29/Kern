@@ -8,7 +8,18 @@
 
 #import "NSString+Kern.h"
 
+static NSString *const kKernUnderscore = @"_";
+static NSString *const kKernSpace = @" ";
+static NSString *const kKernEmptyString = @"";
+
 @implementation NSString (Kern)
+
+- (NSString *)camelCase {
+    NSString *spaced = [self stringByReplacingOccurrencesOfString:kKernUnderscore withString:kKernSpace];
+    NSString *capitalized = [spaced capitalizedString];
+    
+    return [capitalized stringByReplacingOccurrencesOfString:kKernSpace withString:kKernEmptyString];
+}
 
 - (BOOL)isEmpty {
     NSString *a = [self stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters];

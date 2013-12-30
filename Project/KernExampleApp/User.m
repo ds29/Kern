@@ -12,11 +12,20 @@
 
 @implementation User
 
+@dynamic remoteID;
 @dynamic firstName;
 @dynamic lastName;
 @dynamic luckyNumber;
 @dynamic timeStamp;
 
-
++ (NSDictionary*)kern_mappedAttributes {
+    return @{@"user": @{
+//                     @"remoteID": @[@"id",KernDataTypeNumber,KernIsPrimaryKey],
+                     @"firstName": @[@"first_name",KernDataTypeString],
+                     @"lastName": @[@"last_name",KernDataTypeString],
+                     @"luckyNumber": @[@"lucky_number",KernDataTypeNumber,KernIsPrimaryKey],
+                     @"timeStamp": @[@"timestamp",KernDataTypeTime] }
+             };
+}
 
 @end

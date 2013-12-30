@@ -15,8 +15,17 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    // Setup Kern (in memory for example)
-    [Kern setupCoreDataStackWithInMemoryStore];
+    // Setup Kern
+    [Kern setupAutoMigratingCoreDataStack];
+
+    User *u =  [User findByPrimaryKey:@42];
+    NSLog(@"found 42? %@", u);
+    User *u1 = [User findOrCreateByPrimaryKey:@42];
+    NSLog(@"found or created 42? %@", u1);
+    User *u2 = [User findOrCreateByPrimaryKey:@111];
+    NSLog(@"found or created 111? %@", u2);
+    
+    [Kern saveContext];
     
     // Override point for customization after application launch.
     UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;

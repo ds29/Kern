@@ -12,6 +12,8 @@
 
 # pragma mark - Kern methods
 
+- (NSString *)camelCase;
+
 /**
  Returns a Boolean if the receiver is empty.
  
