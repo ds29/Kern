@@ -47,6 +47,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 +(NSDateFormatter*)cachedTimeFormatter {
     if (sCachedTimeFormatter == nil) {
         sCachedTimeFormatter = [[NSDateFormatter alloc] init];
+        [sCachedDateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]]; // set to utc
         [sCachedTimeFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
     }
     return sCachedTimeFormatter;
@@ -140,16 +141,16 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
                 id aValue = [objAttributes valueForKey:remoteKey];
 
                 if (aValue != nil && aValue != [NSNull null]) {
-                    if (dataType == KernDataTypeString || dataType == KernDataTypeNumber || dataType == KernDataTypeBoolean) { //strings and numbers (booleans)
+                    if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString: KernDataTypeNumber] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
                         convertedAttributes[attributeName] = aValue;
                     }
-                    else if (dataType == KernDataTypeDate) {
+                    else if ([dataType isEqualToString:KernDataTypeDate]) {
                         NSDate *dateValue = [[self.class cachedDateFormatter] dateFromString:aValue];
                         if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
                             convertedAttributes[attributeName] = dateValue;
                         }
                     }
-                    else if (dataType == KernDataTypeTime) {
+                    else if ([dataType isEqualToString:KernDataTypeTime]) {
                         NSDate *dateValue = [[self.class cachedTimeFormatter] dateFromString:aValue];
                         if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
                             convertedAttributes[attributeName] = dateValue;
@@ -160,6 +161,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
             }
         }
     }
+    NSLog(@"converted: %@", convertedAttributes);
     
     // set using converted attributes
     [obj updateEntity:convertedAttributes];

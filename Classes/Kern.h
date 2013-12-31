@@ -60,6 +60,7 @@ extern NSString * const kKernDefaultStoreFileName;
 + (NSURL*)storeURL;
 + (void)setupAutoMigratingCoreDataStack;
 + (void)setupInMemoryStoreCoreDataStack;
++ (void)cleanUp;
 
 + (BOOL)saveContext;
 

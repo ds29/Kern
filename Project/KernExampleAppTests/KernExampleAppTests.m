@@ -7,6 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <CoreData/CoreData.h>
+#import <Kern.h>
 
 @interface KernExampleAppTests : XCTestCase
 
@@ -14,21 +16,41 @@
 
 @implementation KernExampleAppTests
 
++ (void)setUp {
+    [NSTimeZone setDefaultTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    [Kern setupInMemoryStoreCoreDataStack];
+}
+
++ (void)tearDown {
+    [Kern cleanUp];
+}
+
 - (void)setUp
 {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
 - (void)tearDown
 {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
 }
 
-- (void)testExample
-{
-    XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+- (void)testCreatesAnEntityWithRemoteDictionary {
+
+    NSDictionary *json = @{@"user": @{
+                                   @"first_name": @"Test",
+                                   @"last_name": @"Guy",
+                                   @"lucky_number": [NSNumber numberWithInt:1],
+                                   @"timestamp": @"1970-01-01T00:00:00Z" // so we can use "since1970"
+                                   }
+                           };
+    
+    User *u = [User updateOrCreateEntityUsingRemoteDictionary:json];
+
+    XCTAssertEqualObjects(u.firstName, @"Test", @"firstName must match supplied value in JSON");
+    XCTAssertEqualObjects(u.lastName, @"Guy", @"lastName must match supplied value in JSON");
+    XCTAssertEqualObjects(u.luckyNumber, @1, @"luckyNumber must match supplied value in JSON");
+    XCTAssertEqualObjects(u.timeStamp, [NSDate dateWithTimeIntervalSince1970:0], @"timeStamp must match supplied value in JSON");
 }
 
 @end

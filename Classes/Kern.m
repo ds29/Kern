@@ -182,6 +182,10 @@ static Kern *_sharedInstance = nil;
     _sharedInstance.managedObjectContext = context;
 }
 
++ (void)cleanUp {
+    _sharedInstance = nil;
+}
+
 #pragma mark - Core Data Save
 
 + (BOOL)saveContext {
