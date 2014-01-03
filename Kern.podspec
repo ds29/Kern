@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Kern"
-  s.version      = "0.6"
+  s.version      = "0.6.1"
   s.summary      = "Kern - an easy Core Data manager"
   s.description  = <<-DESC
                    A simple Core Data manager with easy setup and fetching.
