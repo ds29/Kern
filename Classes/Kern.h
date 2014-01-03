@@ -54,11 +54,10 @@ extern NSString * const kKernDefaultStoreFileName;
 
 @interface Kern : NSObject
 
-+ (instancetype)sharedInstance;
 + (NSManagedObjectContext*)sharedContext;
-
 + (NSURL*)storeURL;
-+ (void)setupAutoMigratingCoreDataStack;
+
++ (void)setupAutoMigratingCoreDataStackWithDoNotBackupAttribute;
 + (void)setupInMemoryStoreCoreDataStack;
 + (void)cleanUp;
 

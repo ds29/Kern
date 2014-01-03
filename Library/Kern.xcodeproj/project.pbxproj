@@ -18,6 +18,7 @@
 		AB7C93EB18721FC200CBB08D /* NSManagedObject+Aggregates.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93EA18721FC200CBB08D /* NSManagedObject+Aggregates.m */; };
 		AB7C93EE1872213900CBB08D /* NSManagedObject+DataMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93ED1872213900CBB08D /* NSManagedObject+DataMapping.m */; };
 		AB7C93F11872216B00CBB08D /* NSManagedObject+Modifiers.m in Sources */ = {isa = PBXBuildFile; fileRef = AB7C93F01872216B00CBB08D /* NSManagedObject+Modifiers.m */; };
+		ABC11CB518774D7000C0FF73 /* NSURL+DoNotBackup.m in Sources */ = {isa = PBXBuildFile; fileRef = ABC11CB418774D7000C0FF73 /* NSURL+DoNotBackup.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -54,6 +55,8 @@
 		AB7C93ED1872213900CBB08D /* NSManagedObject+DataMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+DataMapping.m"; sourceTree = "<group>"; };
 		AB7C93EF1872216B00CBB08D /* NSManagedObject+Modifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+Modifiers.h"; sourceTree = "<group>"; };
 		AB7C93F01872216B00CBB08D /* NSManagedObject+Modifiers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+Modifiers.m"; sourceTree = "<group>"; };
+		ABC11CB318774D7000C0FF73 /* NSURL+DoNotBackup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+DoNotBackup.h"; sourceTree = "<group>"; };
+		ABC11CB418774D7000C0FF73 /* NSURL+DoNotBackup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+DoNotBackup.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +108,8 @@
 				AB7C93DA186CB13000CBB08D /* NSManagedObject+Kern.m */,
 				AB7C93DB186CB13000CBB08D /* NSString+Kern.h */,
 				AB7C93DC186CB13000CBB08D /* NSString+Kern.m */,
+				ABC11CB318774D7000C0FF73 /* NSURL+DoNotBackup.h */,
+				ABC11CB418774D7000C0FF73 /* NSURL+DoNotBackup.m */,
 				AB7C93E318721DD500CBB08D /* NSManagedObject+Finders.h */,
 				AB7C93E418721DD500CBB08D /* NSManagedObject+Finders.m */,
 				AB7C93E618721E6600CBB08D /* NSManagedObject+Fetching.h */,
@@ -171,6 +176,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABC11CB518774D7000C0FF73 /* NSURL+DoNotBackup.m in Sources */,
 				AB7C93F11872216B00CBB08D /* NSManagedObject+Modifiers.m in Sources */,
 				AB7C93B9186CB05700CBB08D /* Kern.m in Sources */,
 				AB7C93DE186CB13000CBB08D /* NSString+Kern.m in Sources */,

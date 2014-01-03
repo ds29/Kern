@@ -1,10 +1,3 @@
-//
-//  NSManagedObject+Fetching.h
-//  Kern
-//
-//  Created by Dustin Steele on 12/30/13.
-//  Copyright (c) 2013 Varsity Tutors. All rights reserved.
-//
 
 #import <CoreData/CoreData.h>
 #import "NSManagedObject+Kern.h"

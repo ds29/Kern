@@ -1,32 +1,22 @@
-//
-//  Kern.m
-//  Kern
-//
-//  Created by Dustin Steele on 12/20/13.
-//  Copyright (c) 2013 Varsity Tutors. All rights reserved.
 
 #import "Kern.h"
+#import "NSURL+DoNotBackup.h"
 
 NSString * const kKernDefaultStoreFileName = @"KernDataStore.sqlite";
-NSString * const kKernDefaultModelFileName = @"KernModel.sqlite";
 NSString * const kKernDefaultBaseName = @"Kern";
-static Kern *_sharedInstance = nil;
+static NSPersistentStore *_persistentStore;
+static NSManagedObjectContext *_privateQueueContext;
+static NSManagedObjectContext *_mainQueueContext;
 
 # pragma mark - Private Declarations
 @interface Kern()
 
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-
-+ (void)setupSharedInstance;
-+ (NSURL*)modelURL;
 + (NSString *)baseName;
 + (NSURL *)applicationDocumentsDirectory;
 + (void)createApplicationSupportDirIfNeeded;
-+ (void)addAutoMigratingSqliteStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator;
-+ (void)addInMemoryStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator;
++ (void)setupAutoMigratingCoreDataStack:(BOOL)shouldAddDoNotBackupAttribute;
 
++ (void)kern_didSaveContext:(NSNotification*)notification;
 + (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest;
 + (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest;
 
@@ -35,40 +25,20 @@ static Kern *_sharedInstance = nil;
 # pragma mark - Kern Implementation
 @implementation Kern
 
-@synthesize managedObjectContext = _managedObjectContext;
-@synthesize managedObjectModel = _managedObjectModel;
-@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
-
-#pragma mark - Initializers / Accessors
-
-// the singleton instance of Kern
-+ (instancetype)sharedInstance {
-    if (!_sharedInstance) {
-        [NSException raise:@"Attempt to access uninitialized instance." format:nil];
-    }
-    return _sharedInstance;
-}
+#pragma mark - Accessors
 
 // the shared context
 + (NSManagedObjectContext*)sharedContext {
-    if (!_sharedInstance) {
-        [NSException raise:@"Attempt to access uninitialized context." format:nil];
+    if (!_mainQueueContext) {
+        [self setupInMemoryStoreCoreDataStack];  // if nothing was setup, we'll use an in memory store
     }
-    return _sharedInstance.managedObjectContext;
-}
-
-// setup a shared instance
-+ (void)setupSharedInstance {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _sharedInstance = [self new];
-    });
+    return _mainQueueContext;
 }
 
 #pragma mark - Path Helpers
 
 + (NSString *)baseName {
-    NSString *defaultName = [[[NSBundle mainBundle] infoDictionary] valueForKey:(id)kCFBundleNameKey];
+    NSString *defaultName = [[[NSBundle bundleForClass:[self class]] infoDictionary] valueForKey:(id)kCFBundleNameKey];
 
     return (defaultName != nil) ? defaultName : kKernDefaultBaseName;
 }
@@ -87,11 +57,6 @@ static Kern *_sharedInstance = nil;
                              withIntermediateDirectories:YES attributes:nil error:nil];
 }
 
-// Return the full path to the model
-+ (NSURL*)modelURL {
-    return [[NSBundle mainBundle] URLForResource:[self baseName] withExtension:@"momd"];
-}
-
 // Return the full path to the data store
 + (NSURL*)storeURL {
    return [[[self applicationDocumentsDirectory] URLByAppendingPathComponent:[self baseName]] URLByAppendingPathExtension:@"sqlite"];
@@ -99,111 +64,124 @@ static Kern *_sharedInstance = nil;
 
 #pragma mark - Core Data Setup
 
-+(void)addAutoMigratingSqliteStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator {
-
-    // make sure our path exists
++ (void)setupAutoMigratingCoreDataStack:(BOOL)shouldAddDoNotBackupAttribute {
+    // setup our object model and persistent store
+    NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
+    
+    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+    
+    
+    // create the folder if we need it
     [self createApplicationSupportDirIfNeeded];
-
+    
     // define the auto migration features
     NSDictionary *options = @{
                               NSMigratePersistentStoresAutomaticallyOption: @YES,
                               NSInferMappingModelAutomaticallyOption: @YES,
                               NSSQLitePragmasOption: @{@"journal_mode": @"WAL"}
                               };
+    
+    NSURL *storeURL = [self storeURL];
+    
+    if (shouldAddDoNotBackupAttribute) {
+        // add do not backup flag
+        [storeURL addSkipBackupAttribute];
+    }
 
     // attempt to create the store
     NSError *error = nil;
-    NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:[self storeURL] options:options error:&error];
+    _persistentStore = [coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error];
     
-    if (!store || error) {
-        NSLog(@"FAILED TO CREATE STORE: %@", error);
+    if (!_persistentStore || error) {
+        NSLog(@"Unable to create persistent store! %@, %@", error, [error userInfo]);
     }
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:nil];
+    
+    _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    [_privateQueueContext setPersistentStoreCoordinator:coordinator];
+    
+    _mainQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    [_mainQueueContext setParentContext:_privateQueueContext];
 }
 
-+ (void)addInMemoryStoreToCoordinator:(NSPersistentStoreCoordinator*)coordinator {
-
-    // attempt to create the store
-    NSError *error = nil;
-    NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:nil error:&error];
-    
-    if (!store || error) {
-        NSLog(@"FAILED TO CREATE STORE: %@", error);
-    }
++ (void)setupAutoMigratingCoreDataStackWithDoNotBackupAttribute {
+    [self setupAutoMigratingCoreDataStack:YES];
 }
 
 + (void)setupAutoMigratingCoreDataStack {
-
-    // setup our object model and persistent store
-    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:[self modelURL]];
-    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
-    
-    // add the auto migrating store to the coordinator
-    [self addAutoMigratingSqliteStoreToCoordinator:coordinator];
-    
-    //HACK: lame solution to fix automigration error "Migration failed after first pass"
-    if ([[coordinator persistentStores] count] == 0)
-    {
-        [self addAutoMigratingSqliteStoreToCoordinator:coordinator];
-    }
-   
-    // setup the managed object context
-    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    [context setPersistentStoreCoordinator:coordinator];
-    
-    
-    // setup our instance
-    [self setupSharedInstance];
-    
-    // populate the instance
-    _sharedInstance.managedObjectModel = model;
-    _sharedInstance.persistentStoreCoordinator = coordinator;
-    _sharedInstance.managedObjectContext = context;
+    [self setupAutoMigratingCoreDataStack:NO];
 }
 
 + (void)setupInMemoryStoreCoreDataStack {
-
     // setup our object model and persistent store
-    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:[self modelURL]];
+    NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
+    
     NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
     
-    // add the auto migrating store to the coordinator
-    [self addInMemoryStoreToCoordinator:coordinator];
     
-    // setup the managed object context
-    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-    [context setPersistentStoreCoordinator:coordinator];
+    // create the folder if we need it
+    [self createApplicationSupportDirIfNeeded];
     
-    // setup our instance
-    [self setupSharedInstance];
+    // define the auto migration features
+    NSDictionary *options = @{
+                              NSMigratePersistentStoresAutomaticallyOption: @YES,
+                              NSInferMappingModelAutomaticallyOption: @YES,
+                              NSSQLitePragmasOption: @{@"journal_mode": @"WAL"}
+                              };
     
-    // populate the instance
-    _sharedInstance.managedObjectModel = model;
-    _sharedInstance.persistentStoreCoordinator = coordinator;
-    _sharedInstance.managedObjectContext = context;
+    // attempt to create the store
+    NSError *error = nil;
+    _persistentStore = [coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:options error:&error];
+    
+    if (!_persistentStore || error) {
+        NSLog(@"Unable to create persistent store! %@, %@", error, [error userInfo]);
+    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:nil];
+    
+    _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    [_privateQueueContext setPersistentStoreCoordinator:coordinator];
+    
+    _mainQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    [_mainQueueContext setParentContext:_privateQueueContext];
 }
 
 + (void)cleanUp {
-    _sharedInstance = nil;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:nil];
+    _persistentStore = nil;
+    _privateQueueContext = nil;
+    _mainQueueContext = nil;
+    
 }
 
 #pragma mark - Core Data Save
 
-+ (BOOL)saveContext {
-    if (_sharedInstance) {
-        NSManagedObjectContext *context = _sharedInstance.managedObjectContext;
-        if (context == nil) return NO;
-        if (![context hasChanges]) return NO;
-        
-        NSError *error = nil;
-        
-        if (![context save:&error]) {
-            NSLog(@"Unable to save context! %@, %@", error, [error userInfo]);
-            return NO;
-        }
-
-        return YES;
++ (void)kern_didSaveContext:(NSNotification*)notification {
+    NSManagedObjectContext *mainContext = _mainQueueContext;
+    if ([notification object] == mainContext) {
+        NSManagedObjectContext *parentContext = [mainContext parentContext];
+        [parentContext performBlock:^{
+            [parentContext save:nil];
+        }];
     }
-    return NO;
+}
+
++ (BOOL)saveContext {
+    NSManagedObjectContext *context = _mainQueueContext;
+    if (context == nil) return NO;
+    if (![context hasChanges]) return NO;
+    
+    NSError *error = nil;
+    
+    if (![context save:&error]) {
+        NSLog(@"Unable to save context! %@, %@", error, [error userInfo]);
+        return NO;
+    }
+
+    return YES;
 }
    
 #pragma mark - Library Helpers

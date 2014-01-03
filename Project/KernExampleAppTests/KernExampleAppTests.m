@@ -19,6 +19,7 @@
 + (void)setUp {
     [NSTimeZone setDefaultTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     [Kern setupInMemoryStoreCoreDataStack];
+    [User truncateAll];
 }
 
 + (void)tearDown {

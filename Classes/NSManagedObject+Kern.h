@@ -1,10 +1,3 @@
-//
-//  NSManagedObject+Kern.h
-//  Kern
-//
-//  Created by Dustin Steele on 12/23/13.
-//  Copyright (c) 2013 Varsity Tutors. All rights reserved.
-//
 
 #import <CoreData/CoreData.h>
 
