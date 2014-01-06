@@ -20,10 +20,10 @@
 
 + (NSDictionary*)kern_mappedAttributes {
     return @{@"user": @{
-//                     @"remoteID": @[@"id",KernDataTypeNumber,KernIsPrimaryKey],
+                     @"remoteID": @[@"id",KernDataTypeNumber,KernIsPrimaryKey],
                      @"firstName": @[@"first_name",KernDataTypeString],
                      @"lastName": @[@"last_name",KernDataTypeString],
-                     @"luckyNumber": @[@"lucky_number",KernDataTypeNumber,KernIsPrimaryKey],
+                     @"luckyNumber": @[@"lucky_number",KernDataTypeNumber],
                      @"timeStamp": @[@"timestamp",KernDataTypeTime] }
              };
 }

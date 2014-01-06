@@ -5,43 +5,6 @@
 
 @implementation NSManagedObject (Fetching)
 
-+ (NSFetchedResultsController*)fetchAll {
-    return [self fetchAllSortedBy:nil groupedBy:nil withLimit:0 where:nil];
-}
-
-+ (NSFetchedResultsController*)fetchAllGroupedBy:(NSString*)group {
-    return [self fetchAllSortedBy:nil groupedBy:group withLimit:0 where:nil];
-}
-
-+ (NSFetchedResultsController*)fetchAllGroupedBy:(NSString*)group where:(id)condition, ... {
-    
-    if ([condition isKindOfClass:[NSString class]]) {
-        va_list args;
-        va_start(args, condition);
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:condition arguments:args];
-        va_end(args);
-        return [self fetchAllSortedBy:nil groupedBy:group withLimit:0 where:predicate];
-    }
-    
-    return [self fetchAllSortedBy:nil groupedBy:nil withLimit:0 where:condition];
-}
-
-+ (NSFetchedResultsController*)fetchAllGroupedBy:(NSString*)group withLimit:(NSUInteger)limit {
-    return [self fetchAllSortedBy:nil groupedBy:group withLimit:limit where:nil];
-}
-
-+ (NSFetchedResultsController*)fetchAllGroupedBy:(NSString*)group withLimit:(NSUInteger)limit where:(id)condition, ... {
-    if ([condition isKindOfClass:[NSString class]]) {
-        va_list args;
-        va_start(args, condition);
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:condition arguments:args];
-        va_end(args);
-        return [self fetchAllSortedBy:nil groupedBy:group withLimit:limit where:predicate];
-    }
-    
-    return [self fetchAllSortedBy:nil groupedBy:group withLimit:limit where:condition];
-}
-
 + (NSFetchedResultsController*)fetchAllSortedBy:(id)sort {
     return [self fetchAllSortedBy:sort groupedBy:nil withLimit:0 where:nil];
 }
@@ -94,30 +57,6 @@
     }
     
     return [self fetchAllSortedBy:sort groupedBy:nil withLimit:limit where:condition];
-}
-
-+ (NSFetchedResultsController*)fetchAllWhere:(id)condition, ... {
-    if ([condition isKindOfClass:[NSString class]]) {
-        va_list args;
-        va_start(args, condition);
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:condition arguments:args];
-        va_end(args);
-        return [self fetchAllSortedBy:nil groupedBy:nil withLimit:0 where:predicate];
-    }
-    
-    return [self fetchAllSortedBy:nil groupedBy:nil withLimit:0 where:condition];
-}
-
-+ (NSFetchedResultsController*)fetchAllWithLimit:(NSUInteger)limit where:(id)condition, ... {
-    if ([condition isKindOfClass:[NSString class]]) {
-        va_list args;
-        va_start(args, condition);
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:condition arguments:args];
-        va_end(args);
-        return [self fetchAllSortedBy:nil groupedBy:nil withLimit:limit where:predicate];
-    }
-    
-    return [self fetchAllSortedBy:nil groupedBy:nil withLimit:limit where:condition];
 }
 
 + (NSFetchedResultsController*)fetchAllSortedBy:(id)sort groupedBy:(NSString *)group withLimit:(NSUInteger)limit where:(id)condition, ... {

@@ -248,9 +248,9 @@ static NSManagedObjectContext *_mainQueueContext;
         BOOL sortDescending = false;
         
         if ([parts count] == 2) {
-            NSString *sortDirection = [[[parts lastObject] stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters] lowercaseString];
+            NSString *sortDirection = [[[parts lastObject] stringByTrimmingLeadingAndTrailingWhitespaceAndNewlineCharacters] uppercaseString];
             
-            sortDescending = [sortDirection isEqualToString:@"desc"];
+            sortDescending = [sortDirection isEqualToString:@"DESC"];
         }
         
         [sortDescriptors addObject:[NSSortDescriptor sortDescriptorWithKey:sortKey ascending:!sortDescending]];

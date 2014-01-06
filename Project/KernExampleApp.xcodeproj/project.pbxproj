@@ -69,6 +69,7 @@
 		AB7C939B186CAF9A00CBB08D /* KernExampleAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KernExampleAppTests.m; sourceTree = "<group>"; };
 		AB7C93DF186CC89800CBB08D /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
 		AB7C93E0186CC89800CBB08D /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
+		ABC11CB61877575C00C0FF73 /* KernExampleApp v2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = file; path = "KernExampleApp v2.xcdatamodel"; sourceTree = "<group>"; };
 		D8D774903A96425C8AAD8CD8 /* Pods-KernExampleAppTests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KernExampleAppTests.xcconfig"; path = "Pods/Pods-KernExampleAppTests.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -584,9 +585,10 @@
 		AB7C937E186CAF9A00CBB08D /* KernExampleApp.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				ABC11CB61877575C00C0FF73 /* KernExampleApp v2.xcdatamodel */,
 				AB7C937F186CAF9A00CBB08D /* KernExampleApp.xcdatamodel */,
 			);
-			currentVersion = AB7C937F186CAF9A00CBB08D /* KernExampleApp.xcdatamodel */;
+			currentVersion = ABC11CB61877575C00C0FF73 /* KernExampleApp v2.xcdatamodel */;
 			path = KernExampleApp.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

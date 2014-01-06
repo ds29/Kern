@@ -17,7 +17,7 @@
 {
 
     // Setup Kern
-    [Kern setupAutoMigratingCoreDataStackWithDoNotBackupAttribute];
+    [Kern setupAutoMigratingCoreDataStack];
 
     // Override point for customization after application launch.
     UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;
