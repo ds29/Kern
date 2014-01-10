@@ -15,6 +15,9 @@ extern NSString* const KernDataTypeTime;
 
 + (NSDictionary*)kern_mappedAttributes;
 
++ (NSString*)kern_primaryKeyAttribute;
++ (NSString*)kern_primaryKeyRemoteKey;
+
 + (instancetype)findByPrimaryKey:(id)aPrimaryKeyValue;
 
 + (instancetype)findOrCreateByPrimaryKey:(id)aPrimaryKeyValue;

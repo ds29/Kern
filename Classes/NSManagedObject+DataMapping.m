@@ -154,7 +154,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
             }
         }
     }
-    NSLog(@"converted: %@", convertedAttributes);
     
     // set using converted attributes
     [obj updateEntity:convertedAttributes];
