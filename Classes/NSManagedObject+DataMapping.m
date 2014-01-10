@@ -48,26 +48,27 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 
 + (NSMutableDictionary*)kern_primaryKeyStore {
     
+    // create a store if one doesn't exist yet
     if (sKernPrimaryKeyStore == nil) {
         sKernPrimaryKeyStore = @{}.mutableCopy;
+    }
+    
+    // create a dictionary if there's not one for this class yet
+    if (sKernPrimaryKeyStore[self.class] == nil) {
         
-        // create a dictionary if there's not one for this class yet
-        if (sKernPrimaryKeyStore[self.class] == nil) {
+        // get down to just the attributes
+        NSDictionary *mappedAttributes = [[[self kern_mappedAttributes] allValues] lastObject];
+        for (NSString *k in mappedAttributes) {
+            NSArray *obj = [mappedAttributes objectForKey:k];
             
-            // get down to just the attributes
-            NSDictionary *mappedAttributes = [[[self kern_mappedAttributes] allValues] lastObject];
-            for (NSString *k in mappedAttributes) {
-                NSArray *obj = [mappedAttributes objectForKey:k];
+            if ([obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
+                NSString *attributeName = [[mappedAttributes allKeysForObject:obj] lastObject];
+                NSString *attributeKey = [obj objectAtIndex:kKernArrayIndexRemoteKey];
                 
-                if ([obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
-                    NSString *attributeName = [[mappedAttributes allKeysForObject:obj] lastObject];
-                    NSString *attributeKey = [obj objectAtIndex:kKernArrayIndexRemoteKey];
-                    
-                    [sKernPrimaryKeyStore setObject:@{KernPrimaryKeyAttribute: attributeName, KernPrimaryKeyRemoteKey: attributeKey} forKey:[self kern_entityName]];
-                }
+                [sKernPrimaryKeyStore setObject:@{KernPrimaryKeyAttribute: attributeName, KernPrimaryKeyRemoteKey: attributeKey} forKey:[self kern_entityName]];
             }
-            
         }
+        
     }
     
     return sKernPrimaryKeyStore;
