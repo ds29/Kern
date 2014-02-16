@@ -5,6 +5,7 @@
 NSString * const kKernDefaultStoreFileName = @"KernDataStore.sqlite";
 NSString * const kKernDefaultBaseName = @"Kern";
 static NSPersistentStore *_persistentStore;
+static NSManagedObjectModel *_managedObjectModel;
 static NSManagedObjectContext *_privateQueueContext;
 static NSManagedObjectContext *_mainQueueContext;
 
@@ -26,6 +27,14 @@ static NSManagedObjectContext *_mainQueueContext;
 @implementation Kern
 
 #pragma mark - Accessors
+
+// the shared model
++ (NSManagedObjectModel*)sharedModel {
+    if (!_managedObjectModel) {
+        [self setupInMemoryStoreCoreDataStack];  // if nothing was setup, we'll use an in memory store
+    }
+    return _managedObjectModel;
+}
 
 // the shared context
 + (NSManagedObjectContext*)sharedContext {
@@ -66,9 +75,9 @@ static NSManagedObjectContext *_mainQueueContext;
 
 + (void)setupAutoMigratingCoreDataStack:(BOOL)shouldAddDoNotBackupAttribute {
     // setup our object model and persistent store
-    NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
+    _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
     
-    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:_managedObjectModel];
     
     
     // create the folder if we need it
@@ -116,9 +125,9 @@ static NSManagedObjectContext *_mainQueueContext;
 
 + (void)setupInMemoryStoreCoreDataStack {
     // setup our object model and persistent store
-    NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
+    _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
     
-    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:_managedObjectModel];
     
     
     // create the folder if we need it

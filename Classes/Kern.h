@@ -54,6 +54,7 @@ extern NSString * const kKernDefaultStoreFileName;
 
 @interface Kern : NSObject
 
++ (NSManagedObjectModel*)sharedModel;
 + (NSManagedObjectContext*)sharedContext;
 + (NSURL*)storeURL;
 
