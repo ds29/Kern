@@ -24,6 +24,10 @@ extern NSString* const KernDataTypeTime;
 
 + (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary;
 
++ (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary andPerformBlockOnEntity:(void(^)(id item))entityBlock;
+
 + (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray;
+
++ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray andPerformBlockOnEntities:(void(^)(id item))entityBlock;
 
 @end

@@ -105,6 +105,10 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 }
 
 + (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary {
+    return [self updateOrCreateEntityUsingRemoteDictionary:aDictionary andPerformBlockOnEntity:nil];
+}
+
++ (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary andPerformBlockOnEntity:(void (^)(id))entityBlock {
     
     NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
     
@@ -158,14 +162,21 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     
     // set using converted attributes
     [obj updateEntity:convertedAttributes];
+    if (entityBlock) {
+        entityBlock(obj);
+    }
     
     return obj;
 }
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray {
++ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray {
+    return [self updateOrCreateEntitiesUsingRemoteArray:anArray andPerformBlockOnEntities:nil];
+}
+
++ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock {
     NSUInteger count = 0;
     for (NSDictionary *aDictionary in anArray) {
-        [self updateOrCreateEntityUsingRemoteDictionary:aDictionary];
+        [self updateOrCreateEntityUsingRemoteDictionary:aDictionary andPerformBlockOnEntity:entityBlock];
         count++;
     }
     return count;
