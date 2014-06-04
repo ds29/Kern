@@ -1,7 +1,7 @@
 
 #import <CoreData/CoreData.h>
 
-typedef void (^KernCoreDataRelationshipBlock)(id model, NSDictionary *objDictionary, NSString *attributeName, NSString *attributeKey);
+typedef void (^KernCoreDataRelationshipBlock)(id obj, id value, NSString *attributeName, NSString *attributeKey);
 
 extern NSString* const KernIsPrimaryKey;
 extern NSString* const KernDataTypeString;

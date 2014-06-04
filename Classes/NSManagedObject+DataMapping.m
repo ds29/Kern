@@ -61,7 +61,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
         for (NSString *k in mappedAttributes) {
             NSArray *obj = [mappedAttributes objectForKey:k];
             
-            if ([obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
+            NSString *dataType = [obj objectAtIndex:kKernArrayIndexDataType];
+
+            if (![dataType isEqualToString:KernDataTypeRelationshipBlock] && [obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
                 NSString *attributeName = [[mappedAttributes allKeysForObject:obj] lastObject];
                 NSString *attributeKey = [obj objectAtIndex:kKernArrayIndexRemoteKey];
                 
@@ -131,13 +133,13 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
         if ([[objAttributes allKeys] containsObject:remoteKey]) {
             NSString *dataType = [item objectAtIndex:kKernArrayIndexDataType];
             
-            if (dataType == KernDataTypeRelationshipBlock) {
+            id aValue = [objAttributes valueForKey:remoteKey];
+
+            if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
                 KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[item objectAtIndex:kKernArrayIndexRelationshipBlock];
-                blk(self,aDictionary,attributeName,remoteKey);
+                blk(obj,aValue,attributeName,remoteKey);
             }
             else {
-                id aValue = [objAttributes valueForKey:remoteKey];
-
                 if (aValue != nil && aValue != [NSNull null]) {
                     if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString: KernDataTypeNumber] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
                         convertedAttributes[attributeName] = aValue;
