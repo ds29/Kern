@@ -2,7 +2,7 @@
 
 A simple Core Data manager with easy setup and fetching. Kern enables a simple context with easy-to-use fetching methods.  It's far less feature-rich than the more awesome libraries like [MagicalRecord](https://github.com/MagicalPanda/MagicalRecord) and [ObjectiveRecord](https://github.com/mneorr/ObjectiveRecord).  It serves a very simple purpose, to store and fetch data in one context (with background processing).
 
-It borrows heavily from the work of the projects above but strips it down to a bare minimum for its intended purpose.  I don't make any claim to its originality (call it a mashup). It's opininated software, if *you* want to do it differently, *you* can.
+It borrows heavily from the work of the projects above but strips it down to a bare minimum for its intended purpose.  I don't make any claim to its originality (call it a mashup).
 
 The one *original* concept/implementation included is the data mapping.  It allows a given `NSManagedObjectModel` to specify a set of mapped attributes (with data types) and then use those attributes to easily save changes.
 
@@ -16,7 +16,7 @@ The one *original* concept/implementation included is the data mapping.  It allo
 	{
 	    // Setup Kern
 	    [Kern setupAutoMigratingCoreDataStack];
-	 
+
 	 	return YES;
 	}
 
@@ -32,7 +32,7 @@ The one *original* concept/implementation included is the data mapping.  It allo
 	jimmy.luckyNumber = @3;
 
 	User *doogie = [User createEntity:@{@"firstName": @"Doogie", @"lastName": @"Howser", @"luckyNumber": @7}];
-  
+
 	User *george = [User createEntity:@{"firstName": @"George", @"lastName": @"Bluth", @"luckyNumber": @13}];
 
 	User *michael = [User createEntity:@{"firstName": @"Michael", @"lastName": @"Bluth", @"luckyNumber": @13}];
@@ -69,7 +69,7 @@ Easy and powerful find/sort options.
 
 	// find and sort by luckyNumber (dictionary form)
 	sorted = [User findAllSortedBy:@{@"luckyNumber": @"asc"}];
-	
+
 	// find and sort by luckyNumber (plain old NSSortDescriptor)
 	sorted = [User findAllSortedBy:[NSSortDescriptor sortDescriptorWithKey:@"luckyNumber" ascending:YES]];
 
@@ -85,30 +85,30 @@ Easy and powerful find/sort options.
 			[NSSortDescriptor sortDescriptorWithKey:@"luckyNumber" ascending:YES],
 		nil];
     sorted = [User findAllSortedBy:descriptors];
-    
-    // limiting 
+
+    // limiting
     NSArray *top3Luckiest = [User findAllSortedBy:@"luckyNumber desc" withLimit:3];
-    
+
     // conditionals (where)
     // find all the bluth's
     NSArray *allBluths = [User findAllWhere:@"lastName ==[cd] 'bluth'")];
-    
+
     // find all the bluths
     allBluths = [User findAllWhere:@"lastName ==[cd] %@", @"bluth"];
 
     // find all the bluths with a luckyNumber of 13
     allBluths = [User findAllWhere:@"lastName ==[cd] %@ AND luckyNumber == %@", @"bluth", @13];
-    
+
     // find all the bluths with a luckyNumber of 13 (dictionary form)
     allBluths = [User findAllWhere:@{@"lastName": @"Bluth", @"luckyNumber": @13}];
-    
+
     // find all the bluths with a luckyNumber of 13 (plain old NSPredicate)
     allBluths = [User findAllWhere:[NSPredicate predicateWithFormat:@"lastName ==[cd] %@ AND luckyNumber == %@", @"bluth", @13]];
 
 	// find, sort, and limit
 	// find all sorted by luckyNumber, limited to top 2, where lastName is bluth
 	NSArray *topTwoBluths = [User findAllSortedBy:@"luckyNumber desc" withLimit:2 where:@"lastName ==[cd] %@", @"bluth"]];
-	
+
 	// fetching with NSFetchedResultsController
 	// fetch all sorted by lastName, luckyNumber DESC and grouped by lastName
 	NSFetchedResultsController *frc = [User fetchAllSortedBy:@"lastName, luckyNumber DESC" groupedBy:@"lastName" where:@"lastName NOT IN %@", @[@"Howser", @"James"]];
@@ -129,12 +129,12 @@ Easy and powerful find/sort options.
 ```obj-c
 
 	// TODO: Describe the process here.  (For now, you can look at the headers, example app, and tests.)
-	
+
 ```
 
 ## Requirements
 
-It requires ARC and iOS 7.  It's only for iOS.  *Ok, it probably can/will run on older/other OS requirements, but that's all it's built/tested against.*
+It requires ARC and iOS 7+.  It's only for iOS.  *Ok, it may run on older/other OS requirements, but that's all it's built/tested against.*
 
 ## Installation
 
