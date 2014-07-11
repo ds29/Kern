@@ -106,7 +106,7 @@ static NSManagedObjectContext *_mainQueueContext;
     }
     
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:[self sharedContext]];
     
     _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [_privateQueueContext setPersistentStoreCoordinator:coordinator];
@@ -148,7 +148,7 @@ static NSManagedObjectContext *_mainQueueContext;
         NSLog(@"Unable to create persistent store! %@, %@", error, [error userInfo]);
     }
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kern_didSaveContext:) name:NSManagedObjectContextDidSaveNotification object:[self sharedContext]];
     
     _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [_privateQueueContext setPersistentStoreCoordinator:coordinator];
@@ -159,7 +159,7 @@ static NSManagedObjectContext *_mainQueueContext;
 
 + (void)cleanUp {
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:[self sharedContext]];
     _persistentStore = nil;
     _privateQueueContext = nil;
     _mainQueueContext = nil;

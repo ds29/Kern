@@ -1,5 +1,9 @@
 # Kern CHANGELOG
 
+## 0.9.1
+
+- Use sharedContext on NSManagedObjectContextDidSaveNotification instead of self.
+
 ## 0.9
 
 - Set NSManagedObjectContextDidSaveNotification listener to use self.
