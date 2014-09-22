@@ -41,7 +41,8 @@ static NSManagedObjectContext *_mainQueueContext;
     if (!_mainQueueContext) {
         [self setupInMemoryStoreCoreDataStack];  // if nothing was setup, we'll use an in memory store
     }
-    return _mainQueueContext;
+	
+	 return _mainQueueContext;
 }
 
 #pragma mark - Path Helpers
@@ -110,9 +111,11 @@ static NSManagedObjectContext *_mainQueueContext;
     
     _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [_privateQueueContext setPersistentStoreCoordinator:coordinator];
+	_privateQueueContext.undoManager = nil; // [BK]
     
     _mainQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     [_mainQueueContext setParentContext:_privateQueueContext];
+	_mainQueueContext.undoManager = nil; // [BK]
 }
 
 + (void)setupAutoMigratingCoreDataStackWithDoNotBackupAttribute {
@@ -179,20 +182,21 @@ static NSManagedObjectContext *_mainQueueContext;
 }
 
 + (BOOL)saveContext {
-    NSManagedObjectContext *context = _mainQueueContext;
-    if (context == nil) return NO;
-    if (![context hasChanges]) return NO;
-    
-    NSError *error = nil;
-    
-    if (![context save:&error]) {
-        NSLog(@"Unable to save context! %@, %@", error, [error userInfo]);
-        return NO;
-    }
-
-    return YES;
+	
+	NSManagedObjectContext *context = _mainQueueContext;
+	if (context == nil) return NO;
+	if (![context hasChanges]) return NO;
+	
+	NSError *error = nil;
+	
+	if (![context save:&error]) {
+		NSLog(@"Unable to save context! %@, %@", error, [error userInfo]);
+		return NO;
+	}
+	
+	return YES;
 }
-   
+
 #pragma mark - Library Helpers
 
 + (NSFetchRequest*)kern_fetchRequestForEntityName:(NSString*)entityName condition:(id)condition sort:(id)sort limit:(NSUInteger)limit {
@@ -218,7 +222,7 @@ static NSManagedObjectContext *_mainQueueContext;
    
 + (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest {
    NSError *error = nil;
-   NSUInteger count = [[self sharedContext] countForFetchRequest:fetchRequest error:&error];
+   NSUInteger count = [[self sharedThreadedContext] countForFetchRequest:fetchRequest error:&error]; // [BK]
    
    if (error) {
        [NSException raise:@"Unable to count for fetch request." format:@"Error: %@", error];
@@ -227,16 +231,34 @@ static NSManagedObjectContext *_mainQueueContext;
    return count;
 }
 
+
+// [BK]
++ (NSManagedObjectContext*)sharedThreadedContext
+{
+	 if([NSThread isMainThread])
+	 {
+		 return _mainQueueContext;
+	 }
+	 else
+	 {
+		 return _privateQueueContext;
+	 }
+}
+
 + (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest {
-   NSError *error = nil;
-   NSArray *results = [[self sharedContext] executeFetchRequest:fetchRequest error:&error];
+	
+	fetchRequest.returnsObjectsAsFaults = NO; // [BK]
+	
+	NSError *error = nil;
+	NSArray *results =results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error]; // [BK]
    
    if (error) {
        [NSException raise:@"Unable to execute fetch request." format:@"Error: %@", error];
    }
-   
+	
    return ([results count] > 0) ? results : nil;
 }
+
 
 #pragma mark - Private
 
