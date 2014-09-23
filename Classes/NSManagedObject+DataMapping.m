@@ -193,6 +193,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	return [results count];
 }
 
+/*
 // [BK]
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock
 {
@@ -229,7 +230,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 		NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
 		id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
 	
-		BOOL objectCreated = FALSE;
 		__block NSManagedObject* obj = [allExistingEntitiesByPK objectForKey:pkValue];
 		if(obj == nil)
 		{
@@ -239,16 +239,65 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	
 				[obj setValue:pkValue forKey:[self kern_primaryKeyAttribute]];
 			}];
-			
-			objectCreated = TRUE;
 		}
 		
 		NSManagedObject* objForMainQueue = [self updateOrCreateEntityUsingRemoteDictionaryMT:aDictionary forObject:obj andPerformBlockOnEntity:entityBlock];
-		//if(objectCreated)
-		//{
-			[results addObject:objForMainQueue];
-		//}
+		
+		[results addObject:objForMainQueue];
+
 	}
+	
+	return results;
+}
+*/
+
+
+// [BK]
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock
+{
+	NSMutableArray *results = [NSMutableArray array];
+	if([anArray count] == 0)
+	{
+		return results;
+	}
+	
+	NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
+	NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
+	NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
+	
+	// Execute on other thread if possible
+	[[Kern sharedContext].parentContext performBlockAndWait:^{ // [BK]
+		
+		NSString *keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey];
+		NSArray *allIDs = [anArray valueForKeyPath:keyPath];
+		NSArray* allExistingEntities = [self findAllWhere:@"%K IN %@", pkAttribute, allIDs];
+		NSMutableDictionary* allExistingEntitiesByPK = [NSMutableDictionary dictionaryWithCapacity:[allExistingEntities count]];
+		
+		for (NSManagedObject *obj in allExistingEntities)
+		{
+			id pkValue = [obj valueForKey:pkAttribute];
+			[allExistingEntitiesByPK setObject:obj forKey:pkValue];
+		}
+	
+		for (NSDictionary *aDictionary in anArray)
+		{
+			NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
+			id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
+			
+			NSManagedObject* obj = [allExistingEntitiesByPK objectForKey:pkValue];
+			if(obj == nil)
+			{
+				obj = [self createEntity];
+				
+				[obj setValue:pkValue forKey:[self kern_primaryKeyAttribute]];
+			}
+			
+			NSManagedObject* objForMainQueue = [self updateOrCreateEntityUsingRemoteDictionaryMT:aDictionary forObject:obj andPerformBlockOnEntity:entityBlock];
+			
+			[results addObject:objForMainQueue];
+		}
+	
+	}];
 	
 	return results;
 }
