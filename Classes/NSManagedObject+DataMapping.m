@@ -196,6 +196,12 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 // [BK]
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock
 {
+	NSMutableArray *results = [NSMutableArray array];
+	if([anArray count] == 0)
+	{
+		return results;
+	}
+	
 	NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
 	NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
 	NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
@@ -218,8 +224,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 		}
 	}];
 	
-	NSMutableArray *results = [NSMutableArray array];
-	
 	for (NSDictionary *aDictionary in anArray)
 	{
 		NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
@@ -240,10 +244,10 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 		}
 		
 		NSManagedObject* objForMainQueue = [self updateOrCreateEntityUsingRemoteDictionaryMT:aDictionary forObject:obj andPerformBlockOnEntity:entityBlock];
-		if(objectCreated)
-		{
+		//if(objectCreated)
+		//{
 			[results addObject:objForMainQueue];
-		}
+		//}
 	}
 	
 	return results;
@@ -268,8 +272,10 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 			id aValue = [objAttributes valueForKey:remoteKey];
 			
 			if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
+			[[Kern sharedContext].parentContext performBlockAndWait:^{ // [BK]
 				KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[item objectAtIndex:kKernArrayIndexRelationshipBlock];
 				blk(obj,aValue,attributeName,remoteKey);
+			}];
 			}
 			else {
 				if (aValue != nil && aValue != [NSNull null]) {
