@@ -247,7 +247,7 @@ static NSManagedObjectContext *_mainQueueContext;
 
 + (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest {
 	
-	fetchRequest.returnsObjectsAsFaults = NO; // [BK]
+	//fetchRequest.returnsObjectsAsFaults = NO; // [BK]
 	
 	NSError *error = nil;
 	NSArray *results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error]; // [BK]
