@@ -210,6 +210,13 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	NSString *keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey];
 	NSArray *allIDs = [anArray valueForKeyPath:keyPath];
 	
+	// This is temp hack for backwards compatibility
+	if([allIDs count] == 0 && [modelName isEqualToString:@"tutor"])
+	{
+		keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@s.%@", modelName, pkKey];
+		allIDs = [anArray valueForKeyPath:keyPath];
+	}
+	
 	__block NSMutableDictionary* allExistingEntitiesByPK = nil;
 	// Execute on other thread if possible
 	[[Kern sharedContext].parentContext performBlockAndWait:^{ // [BK]
