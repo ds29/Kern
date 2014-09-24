@@ -250,7 +250,7 @@ static NSManagedObjectContext *_mainQueueContext;
 	fetchRequest.returnsObjectsAsFaults = NO; // [BK]
 	
 	NSError *error = nil;
-	NSArray *results =results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error]; // [BK]
+	NSArray *results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error]; // [BK]
    
    if (error) {
        [NSException raise:@"Unable to execute fetch request." format:@"Error: %@", error];

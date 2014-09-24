@@ -193,7 +193,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	return [results count];
 }
 
-/*
+
 // [BK]
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock
 {
@@ -249,9 +249,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	
 	return results;
 }
-*/
 
 
+/*
 // [BK]
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock
 {
@@ -301,7 +301,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	
 	return results;
 }
-
+*/
 
 // [BK]
 + (instancetype)updateOrCreateEntityUsingRemoteDictionaryMT:(NSDictionary *)aDictionary forObject:(NSManagedObject*)obj andPerformBlockOnEntity:(void (^)(id))entityBlock {
