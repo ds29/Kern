@@ -7,7 +7,8 @@
 @implementation NSManagedObject (Modifiers)
 
 + (instancetype)createEntity {
-    return [NSEntityDescription insertNewObjectForEntityForName:[self kern_entityName] inManagedObjectContext:[Kern sharedContext]];
+    id entity = [NSEntityDescription insertNewObjectForEntityForName:[self kern_entityName] inManagedObjectContext:[Kern sharedThreadedContext]]; // [BK]
+	return entity;
 }
 
 + (instancetype)createEntity:(NSDictionary *)aDictionary {
@@ -17,6 +18,7 @@
 }
 
 + (BOOL)deleteAllWhere:(id)condition, ... {
+	
     if ([condition isKindOfClass:[NSString class]]) {
         va_list args;
         va_start(args, condition);
@@ -28,11 +30,13 @@
     for (NSManagedObject *entity in [self findAllWhere:condition]) {
         [entity deleteEntity];
     }
+
     return YES;
 }
 
 + (BOOL)truncateAll {
-    return [self deleteAllWhere:nil];
+    BOOL result = [self deleteAllWhere:nil];
+	return result;
 }
 
 - (void)updateEntity:(NSDictionary*)aDictionary {
@@ -40,7 +44,7 @@
 }
 
 - (void)deleteEntity {
-    [[Kern sharedContext] deleteObject:self];
+    [self.managedObjectContext deleteObject:self]; // [BK]
 }
 
 - (BOOL)saveEntity {
