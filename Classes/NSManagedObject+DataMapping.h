@@ -30,7 +30,6 @@ extern NSString* const KernDataTypeTime;
 
 + (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray andPerformBlockOnEntities:(void(^)(id item))entityBlock;
 
-// [BK]
 + (NSUInteger)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray;
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock;
 

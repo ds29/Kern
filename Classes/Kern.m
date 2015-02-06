@@ -111,11 +111,11 @@ static NSManagedObjectContext *_mainQueueContext;
     
     _privateQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [_privateQueueContext setPersistentStoreCoordinator:coordinator];
-	_privateQueueContext.undoManager = nil; // [BK]
+	_privateQueueContext.undoManager = nil;
     
     _mainQueueContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     [_mainQueueContext setParentContext:_privateQueueContext];
-	_mainQueueContext.undoManager = nil; // [BK]
+	_mainQueueContext.undoManager = nil;
 }
 
 + (void)setupAutoMigratingCoreDataStackWithDoNotBackupAttribute {
@@ -222,7 +222,7 @@ static NSManagedObjectContext *_mainQueueContext;
    
 + (NSUInteger)kern_countForFetchRequest:(NSFetchRequest*)fetchRequest {
    NSError *error = nil;
-   NSUInteger count = [[self sharedThreadedContext] countForFetchRequest:fetchRequest error:&error]; // [BK]
+   NSUInteger count = [[self sharedThreadedContext] countForFetchRequest:fetchRequest error:&error];
    
    if (error) {
        [NSException raise:@"Unable to count for fetch request." format:@"Error: %@", error];
@@ -232,7 +232,6 @@ static NSManagedObjectContext *_mainQueueContext;
 }
 
 
-// [BK]
 + (NSManagedObjectContext*)sharedThreadedContext
 {
 	 if([NSThread isMainThread])
@@ -247,10 +246,8 @@ static NSManagedObjectContext *_mainQueueContext;
 
 + (NSArray*)kern_executeFetchRequest:(NSFetchRequest*)fetchRequest {
 	
-	//fetchRequest.returnsObjectsAsFaults = NO; // [BK]
-	
 	NSError *error = nil;
-	NSArray *results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error]; // [BK]
+	NSArray *results = [[self sharedThreadedContext] executeFetchRequest:fetchRequest error:&error];
    
    if (error) {
        [NSException raise:@"Unable to execute fetch request." format:@"Error: %@", error];

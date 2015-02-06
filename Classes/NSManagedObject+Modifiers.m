@@ -7,7 +7,7 @@
 @implementation NSManagedObject (Modifiers)
 
 + (instancetype)createEntity {
-    id entity = [NSEntityDescription insertNewObjectForEntityForName:[self kern_entityName] inManagedObjectContext:[Kern sharedThreadedContext]]; // [BK]
+    id entity = [NSEntityDescription insertNewObjectForEntityForName:[self kern_entityName] inManagedObjectContext:[Kern sharedThreadedContext]];
 	return entity;
 }
 
@@ -44,7 +44,7 @@
 }
 
 - (void)deleteEntity {
-    [self.managedObjectContext deleteObject:self]; // [BK]
+    [self.managedObjectContext deleteObject:self];
 }
 
 - (BOOL)saveEntity {
