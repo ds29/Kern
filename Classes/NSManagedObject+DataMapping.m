@@ -217,8 +217,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
 	NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
 	NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
-	
-	//NSString *keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey];
     
     BOOL hasRootEntityName = [self hasRootEntityNameForArray:anArray modelName:modelName];
     NSString *keyPath = hasRootEntityName ? [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey] : [NSString stringWithFormat:@"@unionOfObjects.%@", pkKey];
