@@ -11,6 +11,10 @@ extern NSString* const KernDataTypeRelationshipBlock;
 extern NSString* const KernDataTypeDate;
 extern NSString* const KernDataTypeTime;
 
+extern NSString* const KernCollectionKeyResultsArray;
+extern NSString* const KernCollectionKeyResultsTotal;
+
+
 @interface NSManagedObject (DataMapping)
 
 + (NSDictionary*)kern_mappedAttributes;
@@ -32,5 +36,8 @@ extern NSString* const KernDataTypeTime;
 
 + (NSUInteger)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray;
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock;
+
++ (NSDictionary*)processCollectionOfEntitiesAccordingToStatusIndicator:(NSArray*)remoteArray;
++ (NSDictionary*)processCollectionOfEntitiesAccordingToStatusIndicator:(NSArray*)remoteArray andPerformBlockOnEntities:(void(^)(id item))entityBlock;
 
 @end
