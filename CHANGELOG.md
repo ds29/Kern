@@ -1,5 +1,11 @@
 # Kern CHANGELOG
 
+## 0.9.5
+
+- New default behavior to handle JSON without root entities.  Root entities are still supported.
+- Added methods to process collections according to a status indicator ['DUN' == ('D' == deleted, 'U' == updated, 'N' == new)]
+- Multithreading features
+
 ## 0.9.2
 
 - Let's just pretend 0.9 and 0.9.1 never happened, ok?
