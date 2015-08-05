@@ -39,6 +39,16 @@
 }
 
 - (NSMutableDictionary*)baseRemoteDictionary {
+    return @{
+        @"id": @11,
+        @"first_name": @"That",
+        @"last_name": @"Guy",
+        @"lucky_number": @3,
+        @"timestamp": @"1970-01-01T00:00:00Z"
+    }.mutableCopy;
+}
+
+- (NSMutableDictionary*)baseRemoteDictionaryWithRootEntity {
     return @{@"user": @{
                      @"id": @11,
                      @"first_name": @"That",
@@ -51,6 +61,10 @@
 
 - (User*)userFromRemoteDictionary {
     return [User updateOrCreateEntityUsingRemoteDictionary:[self baseRemoteDictionary]];
+}
+
+- (User*)userFromRemoteDictionaryWithRootEntity {
+    return [User updateOrCreateEntityUsingRemoteDictionary:[self baseRemoteDictionaryWithRootEntity]];
 }
 
 - (NSMutableDictionary*)baseUserDictionary {
@@ -364,11 +378,38 @@
     XCTAssertEqualObjects(u.timeStamp, [NSDate dateWithTimeIntervalSince1970:0], @"timeStamp must match supplied value in JSON");
 }
 
+- (void)testCreatesAnEntityWithRemoteDictionaryWithRootEntity {
+    
+    User *u = [self userFromRemoteDictionaryWithRootEntity];
+    
+    XCTAssertEqualObjects(u.remoteID, @11, @"remoteID must match supplied value in JSON");
+    XCTAssertEqualObjects(u.firstName, @"That", @"firstName must match supplied value in JSON");
+    XCTAssertEqualObjects(u.lastName, @"Guy", @"lastName must match supplied value in JSON");
+    XCTAssertEqualObjects(u.luckyNumber, @3, @"luckyNumber must match supplied value in JSON");
+    XCTAssertEqualObjects(u.timeStamp, [NSDate dateWithTimeIntervalSince1970:0], @"timeStamp must match supplied value in JSON");
+}
+
 - (void)testUpdatesAnExistingEntityWithRemoteDictionary {
     User *u1 = [self userFromRemoteDictionary];
     
     NSString *firstName = @"Other";
     NSMutableDictionary *json = [self baseRemoteDictionary];
+    json[@"first_name"] = firstName;
+    
+    User *u2 = [User updateOrCreateEntityUsingRemoteDictionary:json];
+    
+    XCTAssertEqualObjects(u2.firstName, firstName, @"firstName must match newly supplied value in JSON");
+    XCTAssertEqualObjects(u1.remoteID, u2.remoteID, @"remoteID must match original value");
+    XCTAssertEqualObjects(u1.lastName, u2.lastName, @"lastName must match original value");
+    XCTAssertEqualObjects(u1.luckyNumber, u2.luckyNumber, @"luckyNumber must match original value");
+    XCTAssertEqualObjects(u1.timeStamp, u2.timeStamp, @"timeStamp must match original value");
+}
+
+- (void)testUpdatesAnExistingEntityWithRemoteDictionaryWithRootEntity {
+    User *u1 = [self userFromRemoteDictionaryWithRootEntity];
+    
+    NSString *firstName = @"Other";
+    NSMutableDictionary *json = [self baseRemoteDictionaryWithRootEntity];
     json[@"user"][@"first_name"] = firstName;
     
     User *u2 = [User updateOrCreateEntityUsingRemoteDictionary:json];

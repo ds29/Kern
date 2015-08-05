@@ -16,6 +16,9 @@ NSString * const KernDataTypeRelationshipBlock = @"__KernDataTypeRelationshipBlo
 NSString * const KernPrimaryKeyAttribute = @"__KernPrimaryKeyAttribute";
 NSString * const KernPrimaryKeyRemoteKey = @"__KernPrimaryKeyRemoteKey";
 
+NSString * const KernCollectionKeyResultsArray = @"__KernCollectionKeyResultsArray";
+NSString * const KernCollectionKeyResultsTotal = @"__KernCollectionKeyResultsTotal";
+
 NSUInteger kKernArrayIndexRemoteKey = 0;
 NSUInteger kKernArrayIndexDataType = 1;
 NSUInteger kKernArrayIndexPrimaryKeyIndicator = 2;
@@ -122,7 +125,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 
 + (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary andPerformBlockOnEntity:(void (^)(id))entityBlock {
     
-    NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
+    NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
+    BOOL hasRootEntityName = [self hasRootEntityNameForDictionary:aDictionary modelName:modelName];
+    NSDictionary *objAttributes = hasRootEntityName ? [[aDictionary allValues] lastObject] : aDictionary;
     
     id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
 
@@ -212,16 +217,11 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
 	NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
 	NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
-	
-	NSString *keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey];
+    
+    BOOL hasRootEntityName = [self hasRootEntityNameForArray:anArray modelName:modelName];
+    NSString *keyPath = hasRootEntityName ? [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey] : [NSString stringWithFormat:@"@unionOfObjects.%@", pkKey];
+    
 	NSArray *allIDs = [anArray valueForKeyPath:keyPath];
-	
-	// This is temp hack for backwards compatibility
-	if([allIDs count] == 0 && [modelName isEqualToString:@"tutor"])
-	{
-		keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@s.%@", modelName, pkKey];
-		allIDs = [anArray valueForKeyPath:keyPath];
-	}
 	
 	__block NSMutableDictionary* allExistingEntitiesByPK = nil;
 	// Execute on other thread if possible
@@ -240,7 +240,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	
 	for (NSDictionary *aDictionary in anArray)
 	{
-		NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
+        NSDictionary *objAttributes = hasRootEntityName ? [[aDictionary allValues] lastObject] : aDictionary;
 		id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
 	
 		__block NSManagedObject* obj = [allExistingEntitiesByPK objectForKey:pkValue];
@@ -267,7 +267,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 
 + (instancetype)updateOrCreateEntityUsingRemoteDictionaryMT:(NSDictionary *)aDictionary forObject:(NSManagedObject*)obj andPerformBlockOnEntity:(void (^)(id))entityBlock {
 	
-	NSDictionary *objAttributes = [[aDictionary allValues] lastObject];
+    NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
+    BOOL hasRootEntityName = [self hasRootEntityNameForDictionary:aDictionary modelName:modelName];
+    NSDictionary *objAttributes = hasRootEntityName ? [[aDictionary allValues] lastObject] : aDictionary;
 	
 	NSDictionary *mappedAttributes = [[[self kern_mappedAttributes] allValues] lastObject];
 	NSMutableDictionary *convertedAttributes = [NSMutableDictionary dictionary];
@@ -335,5 +337,65 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 }
 
 
++ (NSDictionary*)processCollectionOfEntitiesAccordingToStatusIndicator:(NSArray*)remoteArray {
+    return [self processCollectionOfEntitiesAccordingToStatusIndicator:remoteArray andPerformBlockOnEntities:nil];
+}
+
++ (NSDictionary*)processCollectionOfEntitiesAccordingToStatusIndicator:(NSArray*)remoteArray andPerformBlockOnEntities:(void(^)(id item))entityBlock {
+    
+    if([remoteArray count] == 0) {
+        return @{ KernCollectionKeyResultsArray: @[], KernCollectionKeyResultsTotal:@(0) };
+    }
+    
+    NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
+    NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
+    NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
+    
+    NSArray *allItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status != 'D'",modelName]];
+    NSArray *deletedItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status == 'D'",modelName]];
+    
+    BOOL hasRootEntityName = [self hasRootEntityNameForArray:remoteArray modelName:modelName];
+    
+    NSString *keyPath = hasRootEntityName ? [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey] : [NSString stringWithFormat:@"@unionOfObjects.%@", pkKey];
+    
+    NSArray *deletedIDs = [deletedItems valueForKeyPath:keyPath];
+    
+    if ([deletedIDs count] > 0) {
+        // Execute on other thread if possible
+        [[Kern sharedContext].parentContext performBlockAndWait:^{
+            [self deleteAllWhere:@"%K IN %@", pkAttribute, deletedIDs];
+        }];
+    }
+    
+    NSArray* results = [self updateOrCreateEntitiesUsingRemoteArrayMT:allItems andPerformBlockOnEntities:entityBlock];
+    
+    NSInteger recordsAffected = [results count];
+    recordsAffected += [deletedItems count];
+    
+    return @{ KernCollectionKeyResultsArray: results, KernCollectionKeyResultsTotal: [NSNumber numberWithInteger:recordsAffected] };
+}
+
+
+
+// Check if this is API ver1 collection style
++ (BOOL) hasRootEntityNameForArray:(NSArray*)array modelName:(NSString*)modelName
+{
+    NSDictionary* firstElem = array[0];
+    return [self hasRootEntityNameForDictionary:firstElem modelName:modelName];
+}
+
++ (BOOL) hasRootEntityNameForDictionary:(NSDictionary*)dictionary modelName:(NSString*)modelName
+{
+    if([dictionary count] != 1) {
+        return NO;
+    }
+    
+    NSDictionary* value = [dictionary objectForKey:modelName];
+    if([value isKindOfClass:[NSDictionary class]] == NO) {
+        return NO;
+    }
+    
+    return YES;
+}
 
 @end
