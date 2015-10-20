@@ -61,6 +61,15 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 }
 
 
++(NSNumberFormatter*)cachedNumberFormatter {
+    static NSNumberFormatter *sCachedNumberFormatter;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sCachedNumberFormatter = [[NSNumberFormatter alloc] init];
+    });
+    return sCachedNumberFormatter;
+}
+
 + (NSMutableDictionary*)kern_primaryKeyStore {
 	
 	@synchronized(self.kernPrimaryKeyStore)
@@ -156,8 +165,16 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
             }
             else {
                 if (aValue != nil && aValue != [NSNull null]) {
-                    if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString: KernDataTypeNumber] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
+                    if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
                         convertedAttributes[attributeName] = aValue;
+                    }
+                    else if ([dataType isEqualToString: KernDataTypeNumber]) { // numbers
+                        if([aValue isKindOfClass:[NSString class]]) {
+                            convertedAttributes[attributeName] = [[self cachedNumberFormatter] numberFromString:aValue];
+                        }
+                        else {
+                            convertedAttributes[attributeName] = aValue;
+                        }
                     }
                     else if ([dataType isEqualToString:KernDataTypeDate]) {
                         NSDate *dateValue = [[self cachedDateFormatter] dateFromString:aValue];
