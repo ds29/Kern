@@ -367,6 +367,14 @@
 
 #pragma mark - Data Mapping
 
+- (void)testHandlesStringBasedNumbers {
+    NSMutableDictionary *userDictionary = [self baseRemoteDictionary];
+    userDictionary[@"lucky_number"] = @"1.5";
+    
+    User *u = [User updateOrCreateEntityUsingRemoteDictionary:userDictionary];
+    XCTAssertEqual([u.luckyNumber integerValue], [[NSNumber numberWithFloat:1.5] integerValue]);
+}
+
 - (void)testCreatesAnEntityWithRemoteDictionary {
 
     User *u = [self userFromRemoteDictionary];
