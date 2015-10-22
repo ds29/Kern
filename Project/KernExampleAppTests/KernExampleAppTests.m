@@ -417,9 +417,9 @@
     
     Dude *u = [self dudeFromRemoteDictionaryNested];
     
-    XCTAssertEqualObjects(u.remoteID, @11, @"remoteID must match supplied value in JSON");
-    XCTAssertEqualObjects(u.firstName, @"That", @"firstName must match supplied value in JSON");
-    XCTAssertEqualObjects(u.lastName, @"Guy", @"lastName must match supplied value in JSON");
+    XCTAssertEqualObjects(u.remoteID, @11, @"remoteID must match supplied value in JSON, even if provided as string");
+    XCTAssertEqualObjects(u.firstName, @"That", @"name/first must match supplied value in JSON");
+    XCTAssertEqualObjects(u.lastName, @"Guy", @"name/last must match supplied value in JSON");
     XCTAssertEqualObjects(u.luckyNumber, @3, @"luckyNumber must match supplied value in JSON");
     XCTAssertEqualObjects(u.timeStamp, [NSDate dateWithTimeIntervalSince1970:0], @"timeStamp must match supplied value in JSON");
 }
