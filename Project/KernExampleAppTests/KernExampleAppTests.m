@@ -61,7 +61,7 @@
 
 - (NSMutableDictionary*)baseRemoteDictionaryNested {
     return @{
-             @"id": @11,
+             @"id": @"11",
              @"name": @{
                  @"first": @"That",
                  @"last": @"Guy",
