@@ -14,6 +14,7 @@ NSString * const KernDataTypeTime = @"__KernDataTypeTime";
 NSString * const KernDataTypeRelationshipBlock = @"__KernDataTypeRelationshipBlock";
 
 NSString * const KernPrimaryKeyAttribute = @"__KernPrimaryKeyAttribute";
+NSString * const KernPrimaryKeyDataType = @"__KernPrimaryKeyDataType";
 NSString * const KernPrimaryKeyRemoteKey = @"__KernPrimaryKeyRemoteKey";
 
 NSString * const KernCollectionKeyResultsArray = @"__KernCollectionKeyResultsArray";
@@ -60,7 +61,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	return sCachedTimeFormatter;
 }
 
-
 +(NSNumberFormatter*)cachedNumberFormatter {
     static NSNumberFormatter *sCachedNumberFormatter;
     static dispatch_once_t onceToken;
@@ -82,14 +82,18 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 			for (NSString *k in mappedAttributes) {
 				NSArray *obj = [mappedAttributes objectForKey:k];
 				
-				NSString *dataType = [obj objectAtIndex:kKernArrayIndexDataType];
+                // Primary key is not allowed to be nested
+                if([obj isKindOfClass:[NSArray class]])
+                {
+                    NSString *dataType = [obj objectAtIndex:kKernArrayIndexDataType];
 
-				if (![dataType isEqualToString:KernDataTypeRelationshipBlock] && [obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
-					NSString *attributeName = [[mappedAttributes allKeysForObject:obj] lastObject];
-					NSString *attributeKey = [obj objectAtIndex:kKernArrayIndexRemoteKey];
-					
-					[self.kernPrimaryKeyStore setObject:@{KernPrimaryKeyAttribute: attributeName, KernPrimaryKeyRemoteKey: attributeKey} forKey:[self kern_entityName]];
-				}
+                    if (![dataType isEqualToString:KernDataTypeRelationshipBlock] && [obj count] > 2 && [[obj objectAtIndex:kKernArrayIndexPrimaryKeyIndicator] isEqualToString:KernIsPrimaryKey]) {
+                        NSString *attributeName = [[mappedAttributes allKeysForObject:obj] lastObject];
+                        NSString *attributeKey = [obj objectAtIndex:kKernArrayIndexRemoteKey];
+                        
+                        [self.kernPrimaryKeyStore setObject:@{KernPrimaryKeyAttribute: attributeName, KernPrimaryKeyDataType: dataType, KernPrimaryKeyRemoteKey: attributeKey} forKey:[self kern_entityName]];
+                    }
+                }
 			}
 			
 		}
@@ -99,8 +103,11 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 }
 
 + (NSString*)kern_primaryKeyAttribute {
-    
     return [self kern_primaryKeyStore][self.kern_entityName][KernPrimaryKeyAttribute];
+}
+
++ (NSString*)kern_primaryKeyDataType {
+    return [self kern_primaryKeyStore][self.kern_entityName][KernPrimaryKeyDataType];
 }
 
 + (NSString*)kern_primaryKeyRemoteKey {
@@ -139,6 +146,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     NSDictionary *objAttributes = hasRootEntityName ? [[aDictionary allValues] lastObject] : aDictionary;
     
     id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
+    pkValue = [self ensurePrimaryKeyValueType:pkValue];
 
     // need to have a primary key to create or update
     if (![[objAttributes allKeys] containsObject:[self kern_primaryKeyRemoteKey]]) {
@@ -152,50 +160,24 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 
     for (NSString *attributeName in [mappedAttributes allKeys]) {
         NSArray *item = [mappedAttributes objectForKey:attributeName];
-        NSString *remoteKey = [item objectAtIndex:kKernArrayIndexRemoteKey];
-        // only process key if it's in our provided set
-        if ([[objAttributes allKeys] containsObject:remoteKey]) {
-            NSString *dataType = [item objectAtIndex:kKernArrayIndexDataType];
+        
+        if([item isKindOfClass:[NSDictionary class]])
+        {
+            NSDictionary *mappedAttributesNested = (NSDictionary *)item;
             
-            id aValue = [objAttributes valueForKey:remoteKey];
-
-            if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
-                KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[item objectAtIndex:kKernArrayIndexRelationshipBlock];
-                blk(obj,aValue,attributeName,remoteKey);
+            for (NSString *attributeNameNested in [mappedAttributesNested allKeys]) {
+                NSArray *itemNested = [mappedAttributesNested objectForKey:attributeNameNested];
+                [self parseAttributes:attributeNameNested mappedItemAttributes:itemNested objAttributes:objAttributes[attributeName] obj:obj convertedAttributes:convertedAttributes];
             }
-            else {
-                if (aValue != nil && aValue != [NSNull null]) {
-                    if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
-                        convertedAttributes[attributeName] = aValue;
-                    }
-                    else if ([dataType isEqualToString: KernDataTypeNumber]) { // numbers
-                        if([aValue isKindOfClass:[NSString class]]) {
-                            convertedAttributes[attributeName] = [[self cachedNumberFormatter] numberFromString:aValue];
-                        }
-                        else {
-                            convertedAttributes[attributeName] = aValue;
-                        }
-                    }
-                    else if ([dataType isEqualToString:KernDataTypeDate]) {
-                        NSDate *dateValue = [[self cachedDateFormatter] dateFromString:aValue];
-                        if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
-                            convertedAttributes[attributeName] = dateValue;
-                        }
-                    }
-                    else if ([dataType isEqualToString:KernDataTypeTime]) {
-                        NSDate *dateValue = [[self cachedTimeFormatter] dateFromString:aValue];
-                        if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
-                            convertedAttributes[attributeName] = dateValue;
-                        }
-                    }
-                    
-                }
-            }
+        }
+        else {
+            [self parseAttributes:attributeName mappedItemAttributes:item objAttributes:objAttributes obj:obj convertedAttributes:convertedAttributes];
         }
     }
     
     // set using converted attributes
     [obj updateEntity:convertedAttributes];
+    
     if (entityBlock) {
         entityBlock(obj);
     }
@@ -203,23 +185,27 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     return obj;
 }
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray {
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray {
     return [self updateOrCreateEntitiesUsingRemoteArray:anArray andPerformBlockOnEntities:nil];
 }
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock {
-    NSUInteger count = 0;
-    for (NSDictionary *aDictionary in anArray) {
-        [self updateOrCreateEntityUsingRemoteDictionary:aDictionary andPerformBlockOnEntity:entityBlock];
-        count++;
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock {
+    NSMutableArray *results = [NSMutableArray array];
+    if([anArray count] == 0)
+    {
+        return results;
     }
-    return count;
+    
+    for (NSDictionary *aDictionary in anArray) {
+        id object = [self updateOrCreateEntityUsingRemoteDictionary:aDictionary andPerformBlockOnEntity:entityBlock];
+        [results addObject:object];
+    }
+    return results;
 }
 
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray {
-	NSArray* results = [self updateOrCreateEntitiesUsingRemoteArrayMT:anArray andPerformBlockOnEntities:nil];
-	return [results count];
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray {
+	return [self updateOrCreateEntitiesUsingRemoteArrayMT:anArray andPerformBlockOnEntities:nil];
 }
 
 
@@ -259,6 +245,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	{
         NSDictionary *objAttributes = hasRootEntityName ? [[aDictionary allValues] lastObject] : aDictionary;
 		id pkValue = [objAttributes valueForKey:[self kern_primaryKeyRemoteKey]];
+        pkValue = [self ensurePrimaryKeyValueType:pkValue];
 	
 		__block NSManagedObject* obj = [allExistingEntitiesByPK objectForKey:pkValue];
 		if(obj == nil)
@@ -281,7 +268,6 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 }
 
 
-
 + (instancetype)updateOrCreateEntityUsingRemoteDictionaryMT:(NSDictionary *)aDictionary forObject:(NSManagedObject*)obj andPerformBlockOnEntity:(void (^)(id))entityBlock {
 	
     NSString *modelName = [[[self kern_mappedAttributes] allKeys] firstObject]; // mapped attributes must include model name
@@ -293,40 +279,19 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 	
 	for (NSString *attributeName in [mappedAttributes allKeys]) {
 		NSArray *item = [mappedAttributes objectForKey:attributeName];
-		NSString *remoteKey = [item objectAtIndex:kKernArrayIndexRemoteKey];
-		// only process key if it's in our provided set
-		if ([[objAttributes allKeys] containsObject:remoteKey]) {
-			NSString *dataType = [item objectAtIndex:kKernArrayIndexDataType];
-			
-			id aValue = [objAttributes valueForKey:remoteKey];
-			
-			if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
-			[[Kern sharedContext].parentContext performBlockAndWait:^{
-				KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[item objectAtIndex:kKernArrayIndexRelationshipBlock];
-				blk(obj,aValue,attributeName,remoteKey);
-			}];
-			}
-			else {
-				if (aValue != nil && aValue != [NSNull null]) {
-					if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString: KernDataTypeNumber] || [dataType isEqualToString:KernDataTypeBoolean]) { //strings and numbers (booleans)
-						convertedAttributes[attributeName] = aValue;
-					}
-					else if ([dataType isEqualToString:KernDataTypeDate]) {
-						NSDate *dateValue = [[self cachedDateFormatter] dateFromString:aValue];
-						if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
-							convertedAttributes[attributeName] = dateValue;
-						}
-					}
-					else if ([dataType isEqualToString:KernDataTypeTime]) {
-						NSDate *dateValue = [[self cachedTimeFormatter] dateFromString:aValue];
-						if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
-							convertedAttributes[attributeName] = dateValue;
-						}
-					}
-					
-				}
-			}
-		}
+        
+        if([item isKindOfClass:[NSDictionary class]])
+        {
+            NSDictionary *mappedAttributesNested = (NSDictionary *)item;
+            
+            for (NSString *attributeNameNested in [mappedAttributesNested allKeys]) {
+                NSArray *itemNested = [mappedAttributesNested objectForKey:attributeNameNested];
+                [self parseAttributes:attributeNameNested mappedItemAttributes:itemNested objAttributes:objAttributes[attributeName] obj:obj convertedAttributes:convertedAttributes];
+            }
+        }
+        else {
+            [self parseAttributes:attributeName mappedItemAttributes:item objAttributes:objAttributes obj:obj convertedAttributes:convertedAttributes];
+        }
 	}
 	
 	// Execute on other thread if possible
@@ -390,6 +355,69 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     recordsAffected += [deletedItems count];
     
     return @{ KernCollectionKeyResultsArray: results, KernCollectionKeyResultsTotal: [NSNumber numberWithInteger:recordsAffected] };
+}
+
+
+// Helpers
+
++ (void) parseAttributes:(NSString*)attributeName mappedItemAttributes:(NSArray*)mappedItemAttributes objAttributes:(NSDictionary*)objAttributes
+                     obj:(NSManagedObject*)obj convertedAttributes:(NSMutableDictionary*)convertedAttributes
+{
+    NSString *remoteKey = [mappedItemAttributes objectAtIndex:kKernArrayIndexRemoteKey];
+    // only process key if it's in our provided set
+    if ([[objAttributes allKeys] containsObject:remoteKey]) {
+        NSString *dataType = [mappedItemAttributes objectAtIndex:kKernArrayIndexDataType];
+        
+        id aValue = [objAttributes valueForKey:remoteKey];
+        
+        if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
+            [[Kern sharedContext].parentContext performBlockAndWait:^{
+                KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[mappedItemAttributes objectAtIndex:kKernArrayIndexRelationshipBlock];
+                blk(obj, aValue, attributeName, remoteKey);
+            }];
+        }
+        else
+        {
+            if (aValue != nil && aValue != [NSNull null]) {
+                if ([dataType isEqualToString:KernDataTypeString] || [dataType isEqualToString:KernDataTypeBoolean]) {
+                    convertedAttributes[attributeName] = aValue;
+                }
+                else if ([dataType isEqualToString: KernDataTypeNumber]) {
+                    if([aValue isKindOfClass:[NSString class]]) {
+                        convertedAttributes[attributeName] = [[self cachedNumberFormatter] numberFromString:aValue];
+                    }
+                    else {
+                        convertedAttributes[attributeName] = aValue;
+                    }
+                }
+                else if ([dataType isEqualToString:KernDataTypeDate]) {
+                    NSDate *dateValue = [[self cachedDateFormatter] dateFromString:aValue];
+                    if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
+                        convertedAttributes[attributeName] = dateValue;
+                    }
+                }
+                else if ([dataType isEqualToString:KernDataTypeTime]) {
+                    NSDate *dateValue = [[self cachedTimeFormatter] dateFromString:aValue];
+                    if (dateValue && ![dateValue isKindOfClass:[NSNull class]]) {
+                        convertedAttributes[attributeName] = dateValue;
+                    }
+                }
+            }
+        }
+    }
+}
+
++ (id) ensurePrimaryKeyValueType:(id)pkValue
+{
+    NSString* dataType = [self kern_primaryKeyDataType];
+    
+    if ([dataType isEqualToString: KernDataTypeNumber]) {
+        if([pkValue isKindOfClass:[NSString class]]) {
+            pkValue = [[self cachedNumberFormatter] numberFromString:pkValue];
+        }
+    }
+    
+    return pkValue;
 }
 
 
