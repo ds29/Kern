@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		439A16001BD9A51E00F6E0E2 /* Dude.m in Sources */ = {isa = PBXBuildFile; fileRef = 439A15FF1BD9A51E00F6E0E2 /* Dude.m */; settings = {ASSET_TAGS = (); }; };
+		439A16001BD9A51E00F6E0E2 /* Dude.m in Sources */ = {isa = PBXBuildFile; fileRef = 439A15FF1BD9A51E00F6E0E2 /* Dude.m */; };
 		85B0152DE5F54FD1A842F03D /* libPods-KernExampleApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 124E5B52AB31455D9B705DFA /* libPods-KernExampleApp.a */; };
 		AB7C9368186CAF9A00CBB08D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB7C9367186CAF9A00CBB08D /* Foundation.framework */; };
 		AB7C936A186CAF9A00CBB08D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB7C9369186CAF9A00CBB08D /* CoreGraphics.framework */; };
@@ -213,6 +213,7 @@
 				AB7C9361186CAF9A00CBB08D /* Frameworks */,
 				AB7C9362186CAF9A00CBB08D /* Resources */,
 				96A9B4D02FED47CFA4848BE1 /* Copy Pods Resources */,
+				E46E2543477A25A1EB27A746 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -232,6 +233,7 @@
 				AB7C938A186CAF9A00CBB08D /* Frameworks */,
 				AB7C938B186CAF9A00CBB08D /* Resources */,
 				164AB9F48BF2403197067CA6 /* Copy Pods Resources */,
+				1A2F23B511ABC3573B1366A3 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -314,6 +316,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-KernExampleAppTests/Pods-KernExampleAppTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		1A2F23B511ABC3573B1366A3 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-KernExampleAppTests/Pods-KernExampleAppTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		62A55242A3DC476C84922F67 /* Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -342,6 +359,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-KernExampleApp/Pods-KernExampleApp-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E46E2543477A25A1EB27A746 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-KernExampleApp/Pods-KernExampleApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E74FD9AA4577443D9422346E /* Check Pods Manifest.lock */ = {
