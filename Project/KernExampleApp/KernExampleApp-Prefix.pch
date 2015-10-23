@@ -16,6 +16,7 @@
     #import <CoreData/CoreData.h>
 
     #import "User.h"
+    #import "Dude.h"
 
     #define vt_randomIntInRange(min, max) (arc4random() % ((max + 1) - min)) + min
 

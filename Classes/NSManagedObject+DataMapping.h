@@ -30,11 +30,10 @@ extern NSString* const KernCollectionKeyResultsTotal;
 
 + (instancetype)updateOrCreateEntityUsingRemoteDictionary:(NSDictionary *)aDictionary andPerformBlockOnEntity:(void(^)(id item))entityBlock;
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray;
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArray:(NSArray*)anArray;
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray andPerformBlockOnEntities:(void(^)(id item))entityBlock;
 
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArray:(NSArray *)anArray andPerformBlockOnEntities:(void(^)(id item))entityBlock;
-
-+ (NSUInteger)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray;
++ (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray *)anArray;
 + (NSArray*)updateOrCreateEntitiesUsingRemoteArrayMT:(NSArray*)anArray andPerformBlockOnEntities:(void (^)(id))entityBlock;
 
 + (NSDictionary*)processCollectionOfEntitiesAccordingToStatusIndicator:(NSArray*)remoteArray;
