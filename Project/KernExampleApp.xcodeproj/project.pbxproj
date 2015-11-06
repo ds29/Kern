@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0198580D1BED31F3007B6B86 /* Problem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0198580C1BED31F3007B6B86 /* Problem.m */; settings = {ASSET_TAGS = (); }; };
 		439A16001BD9A51E00F6E0E2 /* Dude.m in Sources */ = {isa = PBXBuildFile; fileRef = 439A15FF1BD9A51E00F6E0E2 /* Dude.m */; };
 		85B0152DE5F54FD1A842F03D /* libPods-KernExampleApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 124E5B52AB31455D9B705DFA /* libPods-KernExampleApp.a */; };
 		AB7C9368186CAF9A00CBB08D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB7C9367186CAF9A00CBB08D /* Foundation.framework */; };
@@ -42,6 +43,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0198580A1BED3185007B6B86 /* KernExampleApp_v3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = KernExampleApp_v3.xcdatamodel; sourceTree = "<group>"; };
+		0198580B1BED31F3007B6B86 /* Problem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Problem.h; sourceTree = "<group>"; };
+		0198580C1BED31F3007B6B86 /* Problem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Problem.m; sourceTree = "<group>"; };
 		124E5B52AB31455D9B705DFA /* libPods-KernExampleApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-KernExampleApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16096A208E8D8DD56A380499 /* Pods-KernExampleApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KernExampleApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-KernExampleApp/Pods-KernExampleApp.debug.xcconfig"; sourceTree = "<group>"; };
 		439A15FE1BD9A51E00F6E0E2 /* Dude.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dude.h; sourceTree = "<group>"; };
@@ -167,6 +171,8 @@
 				AB7C93E0186CC89800CBB08D /* User.m */,
 				439A15FE1BD9A51E00F6E0E2 /* Dude.h */,
 				439A15FF1BD9A51E00F6E0E2 /* Dude.m */,
+				0198580B1BED31F3007B6B86 /* Problem.h */,
+				0198580C1BED31F3007B6B86 /* Problem.m */,
 				AB7C9370186CAF9A00CBB08D /* Supporting Files */,
 			);
 			path = KernExampleApp;
@@ -403,6 +409,7 @@
 				AB7C9380186CAF9A00CBB08D /* KernExampleApp.xcdatamodeld in Sources */,
 				AB7C93E1186CC89800CBB08D /* User.m in Sources */,
 				AB7C937A186CAF9A00CBB08D /* VTAppDelegate.m in Sources */,
+				0198580D1BED31F3007B6B86 /* Problem.m in Sources */,
 				AB7C9386186CAF9A00CBB08D /* VTDetailViewController.m in Sources */,
 				AB7C9376186CAF9A00CBB08D /* main.m in Sources */,
 			);
@@ -635,10 +642,11 @@
 		AB7C937E186CAF9A00CBB08D /* KernExampleApp.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				0198580A1BED3185007B6B86 /* KernExampleApp_v3.xcdatamodel */,
 				ABC11CB61877575C00C0FF73 /* KernExampleApp v2.xcdatamodel */,
 				AB7C937F186CAF9A00CBB08D /* KernExampleApp.xcdatamodel */,
 			);
-			currentVersion = ABC11CB61877575C00C0FF73 /* KernExampleApp v2.xcdatamodel */;
+			currentVersion = 0198580A1BED3185007B6B86 /* KernExampleApp_v3.xcdatamodel */;
 			path = KernExampleApp.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

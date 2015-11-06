@@ -71,6 +71,34 @@
              }.mutableCopy;
 }
 
+- (NSMutableDictionary*)problemDictionary
+{
+    return @{
+             @"problemID": @11,
+             @"name": @"Guy",
+             @"status": @"N",
+             }.mutableCopy;
+}
+
+- (NSMutableDictionary*)remoteProblemDictionaryWithRootEntity
+{
+    return @{@"problem": @{
+                     @"id": @11,
+                     @"display_name": @"Guy",
+                     @"status": @"D",
+                     }.mutableCopy
+             }.mutableCopy;
+}
+
+- (NSMutableDictionary*)remoteProblemDictionary
+{
+    return  @{
+              @"id": @11,
+              @"display_name": @"Guy",
+              @"status": @"D",
+              }.mutableCopy;
+}
+
 - (User*)userFromRemoteDictionary {
     return [User updateOrCreateEntityUsingRemoteDictionary:[self baseRemoteDictionary]];
 }
@@ -454,6 +482,34 @@
     XCTAssertEqualObjects(u1.lastName, u2.lastName, @"lastName must match original value");
     XCTAssertEqualObjects(u1.luckyNumber, u2.luckyNumber, @"luckyNumber must match original value");
     XCTAssertEqualObjects(u1.timeStamp, u2.timeStamp, @"timeStamp must match original value");
+}
+
+// Can we create a problem, then delete it using a dictionary WITH a root entity.
+- (void)testProcessCollectionOfEntitiesWithRemoteDictionaryContainingRootEntity
+{
+    [Problem createEntity:[self problemDictionary]];
+    
+    NSUInteger total = [Problem countAll];
+    XCTAssert(total == 1, @"Must have a count of one after creating an entity.");
+    
+    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[[self remoteProblemDictionaryWithRootEntity]]];
+    
+    total = [Problem countAll];
+    XCTAssert(total == 0, @"Must have no problems after processing the remote dictionary with root entity");
+}
+
+// Can we create a problem, then delete it using a dictionary WITHOUT a root entity.
+- (void)testProcessCollectionOfEntitiesWithRemoteDictionary
+{
+    [Problem createEntity:[self problemDictionary]];
+    
+    NSUInteger total = [Problem countAll];
+    XCTAssert(total == 1, @"Must have a count of one after creating an entity.");
+    
+    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[[self remoteProblemDictionary]]];
+    
+    total = [Problem countAll];
+    XCTAssert(total == 0, @"Must have no problems after processing the remote dictionary without root entity");
 }
 
 @end

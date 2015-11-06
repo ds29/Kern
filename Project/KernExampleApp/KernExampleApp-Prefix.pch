@@ -17,6 +17,7 @@
 
     #import "User.h"
     #import "Dude.h"
+    #import "Problem.h"
 
     #define vt_randomIntInRange(min, max) (arc4random() % ((max + 1) - min)) + min
 

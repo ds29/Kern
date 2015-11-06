@@ -333,12 +333,22 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     NSString *pkAttribute = [self kern_primaryKeyAttribute]; // get the primary key's attribute
     NSString *pkKey = [self kern_primaryKeyRemoteKey]; // get the remote key name for the primary key
     
-    NSArray *allItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status != 'D'",modelName]];
-    NSArray *deletedItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status == 'D'",modelName]];
-    
     BOOL hasRootEntityName = [self hasRootEntityNameForArray:remoteArray modelName:modelName];
+    NSArray *allItems;
+    NSArray *deletedItems;
+    NSString *keyPath;
     
-    NSString *keyPath = hasRootEntityName ? [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey] : [NSString stringWithFormat:@"@unionOfObjects.%@", pkKey];
+    if (hasRootEntityName) {
+        allItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status != 'D'", modelName]];
+        deletedItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%K.status == 'D'", modelName]];
+        keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@.%@", modelName, pkKey];
+    }
+    else {
+        allItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"status != 'D'"]];
+        deletedItems = [remoteArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"status == 'D'"]];
+        keyPath = [NSString stringWithFormat:@"@unionOfObjects.%@", pkKey];
+    }
+    
     
     NSArray *deletedIDs = [deletedItems valueForKeyPath:keyPath];
     
