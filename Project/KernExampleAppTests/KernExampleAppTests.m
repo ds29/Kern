@@ -74,7 +74,7 @@
 - (NSMutableDictionary*)problemDictionary
 {
     return @{
-             @"problemID": @11,
+             @"problemID": @1,
              @"name": @"Guy",
              @"status": @"N",
              }.mutableCopy;
@@ -83,9 +83,9 @@
 - (NSMutableDictionary*)remoteProblemDictionaryWithRootEntity
 {
     return @{@"problem": @{
-                     @"id": @11,
+                     @"id": @1,
                      @"display_name": @"Guy",
-                     @"status": @"D",
+                     @"status": @"N",
                      }.mutableCopy
              }.mutableCopy;
 }
@@ -93,9 +93,9 @@
 - (NSMutableDictionary*)remoteProblemDictionary
 {
     return  @{
-              @"id": @11,
+              @"id": @1,
               @"display_name": @"Guy",
-              @"status": @"D",
+              @"status": @"N",
               }.mutableCopy;
 }
 
@@ -484,32 +484,92 @@
     XCTAssertEqualObjects(u1.timeStamp, u2.timeStamp, @"timeStamp must match original value");
 }
 
-// Can we create a problem, then delete it using a dictionary WITH a root entity.
+// Can we create problems, then update some of them using a dictionary WITH a root entity.
 - (void)testProcessCollectionOfEntitiesWithRemoteDictionaryContainingRootEntity
 {
-    [Problem createEntity:[self problemDictionary]];
+    NSInteger addedCount = 5;
+    NSMutableDictionary *base = [self problemDictionary];
+    for (int i = 1; i <= addedCount; i++) {
+        base[@"problemID"] = @(i);
+        base[@"name"] = [NSString stringWithFormat:@"Guy%@", @(i)];
+        [Problem createEntity:base];
+    }
     
-    NSUInteger total = [Problem countAll];
-    XCTAssert(total == 1, @"Must have a count of one after creating an entity.");
+    NSUInteger total = [Problem countAllWhere:@"name CONTAINS [cd] %@", @"guy"];
+    XCTAssert(total == addedCount, @"Must have a count of %@ after creating records.", @(addedCount));
     
-    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[[self remoteProblemDictionaryWithRootEntity]]];
+    // New record
+    NSMutableDictionary *remoteOne = [self remoteProblemDictionaryWithRootEntity];
+    remoteOne[@"problem"][@"id"] = @(10);
+    remoteOne[@"problem"][@"display_name"] = @"Guy10";
     
-    total = [Problem countAll];
-    XCTAssert(total == 0, @"Must have no problems after processing the remote dictionary with root entity");
+    // Updated record
+    NSMutableDictionary *remoteTwo = [self remoteProblemDictionaryWithRootEntity];
+    remoteTwo[@"problem"][@"id"] = @(1);
+    remoteTwo[@"problem"][@"display_name"] = @"That Guy";
+    remoteTwo[@"problem"][@"status"] = @"U";
+
+    // Deleted record
+    NSMutableDictionary *remoteThree = [self remoteProblemDictionaryWithRootEntity];
+    remoteThree[@"problem"][@"id"] = @(2);
+    remoteThree[@"problem"][@"display_name"] = @"Guy2";
+    remoteThree[@"problem"][@"status"] = @"D";
+    
+    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[remoteOne, remoteTwo, remoteThree]];
+    
+    total = [Problem countAllWhere:@"name CONTAINS [cd] %@", @"guy"];
+    NSUInteger subTotalOne = [Problem countAllWhere:@"name == [cd] %@", @"guy10"];
+    NSUInteger subTotalTwo = [Problem countAllWhere:@"name == [cd] %@", @"that guy"];
+    NSUInteger subTotalThree = [Problem countAllWhere:@"name == [cd] %@", @"guy2"];
+
+    XCTAssert(total == addedCount, @"Must have a count of %@ after processing the remote dictionary.", @(addedCount));
+    XCTAssert(subTotalOne == 1, @"Must have 1 record named Guy10 after processing the remote dictionary.");
+    XCTAssert(subTotalTwo == 1, @"Must have 1 record named That guy after processing the remote dictionary.");
+    XCTAssert(subTotalThree == 0, @"Must have 0 records named Guy2 after processing the remote dictionary.");
 }
 
-// Can we create a problem, then delete it using a dictionary WITHOUT a root entity.
+// Can we create problems, then update some of them using a dictionary WITHOUT a root entity.
 - (void)testProcessCollectionOfEntitiesWithRemoteDictionary
 {
-    [Problem createEntity:[self problemDictionary]];
+    NSInteger addedCount = 5;
+    NSMutableDictionary *base = [self problemDictionary];
+    for (int i = 101; i <= 100 + addedCount; i++) {
+        base[@"problemID"] = @(i);
+        base[@"name"] = [NSString stringWithFormat:@"Girl%@", @(i)];
+        [Problem createEntity:base];
+    }
     
-    NSUInteger total = [Problem countAll];
-    XCTAssert(total == 1, @"Must have a count of one after creating an entity.");
+    NSUInteger total = [Problem countAllWhere:@"name CONTAINS [cd] %@", @"girl"];
+    XCTAssert(total == addedCount, @"Must have a count of %@ after creating records.", @(addedCount));
     
-    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[[self remoteProblemDictionary]]];
+    // New record
+    NSMutableDictionary *remoteOne = [self remoteProblemDictionary];
+    remoteOne[@"id"] = @(200);
+    remoteOne[@"display_name"] = @"Girl200";
     
-    total = [Problem countAll];
-    XCTAssert(total == 0, @"Must have no problems after processing the remote dictionary without root entity");
+    // Updated record
+    NSMutableDictionary *remoteTwo = [self remoteProblemDictionary];
+    remoteTwo[@"id"] = @(101);
+    remoteTwo[@"display_name"] = @"That Girl";
+    remoteTwo[@"status"] = @"U";
+    
+    // Deleted record
+    NSMutableDictionary *remoteThree = [self remoteProblemDictionary];
+    remoteThree[@"id"] = @(102);
+    remoteThree[@"display_name"] = @"Girl102";
+    remoteThree[@"status"] = @"D";
+    
+    [Problem processCollectionOfEntitiesAccordingToStatusIndicator:@[remoteOne, remoteTwo, remoteThree]];
+    
+    total = [Problem countAllWhere:@"name CONTAINS [cd] %@", @"girl"];
+    NSUInteger subTotalOne = [Problem countAllWhere:@"name == [cd] %@", @"girl200"];
+    NSUInteger subTotalTwo = [Problem countAllWhere:@"name == [cd] %@", @"that girl"];
+    NSUInteger subTotalThree = [Problem countAllWhere:@"name == [cd] %@", @"girl102"];
+
+    XCTAssert(total == addedCount, @"Must have a count of %@ after processing the remote dictionary.", @(addedCount));
+    XCTAssert(subTotalOne == 1, @"Must have 1 record named Girl200 after processing the remote dictionary.");
+    XCTAssert(subTotalTwo == 1, @"Must have 1 record named That Girl after processing the remote dictionary.");
+    XCTAssert(subTotalThree == 0, @"Must have 0 records named Girl102 after processing the remote dictionary.");
 }
 
 @end
