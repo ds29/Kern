@@ -344,7 +344,7 @@ static NSManagedObjectContext *_mainQueueContext;
             
             return [NSCompoundPredicate andPredicateWithSubpredicates:subpredicates];        }
         
-        [NSException raise:@"Invalid conditional." format:nil];
+        @throw [NSException exceptionWithName:@"InvalidConditional" reason:@"Invalid conditional." userInfo:nil];
     }
     
     return nil;
