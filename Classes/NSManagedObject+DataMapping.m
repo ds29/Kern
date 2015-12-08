@@ -413,6 +413,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
                     }
                 }
             }
+            else {
+                convertedAttributes[attributeName] = [NSNull null];
+            }
         }
     }
 }

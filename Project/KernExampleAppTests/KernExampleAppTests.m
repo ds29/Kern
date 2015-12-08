@@ -484,6 +484,20 @@
     XCTAssertEqualObjects(u1.timeStamp, u2.timeStamp, @"timeStamp must match original value");
 }
 
+- (void)testUpdatesAnExistingEntityWithNilWithRemoteDictionary {
+    User *u1 = [self userFromRemoteDictionary];
+    
+    XCTAssertEqualObjects(u1.firstName, @"That", @"firstName must supplied value in JSON");
+    
+    NSMutableDictionary *json = [self baseRemoteDictionary];
+    json[@"first_name"] = [NSNull null];
+    
+    User *u2 = [User updateOrCreateEntityUsingRemoteDictionary:json];
+    
+    XCTAssertEqualObjects(u2.firstName, nil, @"firstName must be nil");
+}
+
+
 // Can we create problems, then update some of them using a dictionary WITH a root entity.
 - (void)testProcessCollectionOfEntitiesWithRemoteDictionaryContainingRootEntity
 {
