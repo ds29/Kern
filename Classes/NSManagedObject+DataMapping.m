@@ -414,7 +414,14 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
                 }
             }
             else {
-                convertedAttributes[attributeName] = [NSNull null];
+                
+                // If a default exists, set it. Otherwise, enforce null.
+                NSAttributeDescription *description = [obj.entity.attributesByName objectForKey:attributeName];
+                if (description.defaultValue) {
+                    convertedAttributes[attributeName] = description.defaultValue;
+                } else {
+                    convertedAttributes[attributeName] = [NSNull null];
+                }
             }
         }
     }

@@ -491,10 +491,12 @@
     
     NSMutableDictionary *json = [self baseRemoteDictionary];
     json[@"first_name"] = [NSNull null];
-    
+    json[@"lucky_number"] = [NSNull null];
+
     User *u2 = [User updateOrCreateEntityUsingRemoteDictionary:json];
     
     XCTAssertEqualObjects(u2.firstName, nil, @"firstName must be nil");
+    XCTAssertEqualObjects(u2.luckyNumber, @0, @"luckyNumber must have a default value of 0");
 }
 
 
