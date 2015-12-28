@@ -1,5 +1,5 @@
 PODS:
-  - Kern (0.9.9)
+  - Kern (1.0)
 
 DEPENDENCIES:
   - Kern (from `../Kern.podspec`)
@@ -9,6 +9,6 @@ EXTERNAL SOURCES:
     :path: "../Kern.podspec"
 
 SPEC CHECKSUMS:
-  Kern: 593bf406cd4155dacbf48a153216ed4fd800b6a6
+  Kern: 6a6edac0a478d09835d1e7d1787a012dad99dbec
 
 COCOAPODS: 0.39.0
