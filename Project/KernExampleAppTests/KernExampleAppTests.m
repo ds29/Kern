@@ -460,7 +460,7 @@
     Dude *aDude = [Dude updateOrCreateEntityUsingRemoteDictionary:json];
     
     XCTAssertNil(aDude.firstName, @"firstName must be NULL");
-    XCTAssertNil(aDude.lastName, @"firstName must be NULL");
+    XCTAssertNil(aDude.lastName, @"lastName must be NULL");
 }
 
 - (void)testUpdatesAnExistingEntityWithRemoteDictionaryNestedNull {
@@ -473,7 +473,7 @@
     [Dude updateOrCreateEntityUsingRemoteDictionary:json];
     
     XCTAssertNil(dudeOne.firstName, @"firstName must be NULL");
-    XCTAssertNil(dudeOne.lastName, @"firstName must be NULL");
+    XCTAssertNil(dudeOne.lastName, @"lastName must be NULL");
 }
 
 - (void)testUpdatesAnExistingEntityWithRemoteDictionary {
