@@ -380,7 +380,7 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
         
         id aValue = [objAttributes valueForKey:remoteKey];
         
-        if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
+        if (aValue && ![aValue isEqual:[NSNull null]] && [dataType isEqualToString:KernDataTypeRelationshipBlock]) {
             [[Kern sharedContext].parentContext performBlockAndWait:^{
                 KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[mappedItemAttributes objectAtIndex:kKernArrayIndexRelationshipBlock];
                 blk(obj, aValue, attributeName, remoteKey);
