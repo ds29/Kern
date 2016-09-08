@@ -452,6 +452,30 @@
     XCTAssertEqualObjects(u.timeStamp, [NSDate dateWithTimeIntervalSince1970:0], @"timeStamp must match supplied value in JSON");
 }
 
+- (void)testCreatesAnEntityWithRemoteDictionaryNestedNull {
+    
+    NSMutableDictionary *json = [self baseRemoteDictionaryNested];
+    json[@"name"] = [NSNull null];
+    
+    Dude *aDude = [Dude updateOrCreateEntityUsingRemoteDictionary:json];
+    
+    XCTAssertNil(aDude.firstName, @"firstName must be NULL");
+    XCTAssertNil(aDude.lastName, @"firstName must be NULL");
+}
+
+- (void)testUpdatesAnExistingEntityWithRemoteDictionaryNestedNull {
+    
+    Dude *dudeOne = [self dudeFromRemoteDictionaryNested];
+    
+    NSMutableDictionary *json = [self baseRemoteDictionaryNested];
+    json[@"name"] = [NSNull null];
+    
+    [Dude updateOrCreateEntityUsingRemoteDictionary:json];
+    
+    XCTAssertNil(dudeOne.firstName, @"firstName must be NULL");
+    XCTAssertNil(dudeOne.lastName, @"firstName must be NULL");
+}
+
 - (void)testUpdatesAnExistingEntityWithRemoteDictionary {
     User *u1 = [self userFromRemoteDictionary];
     

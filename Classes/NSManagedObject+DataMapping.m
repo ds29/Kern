@@ -373,9 +373,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
 + (void) parseAttributes:(NSString*)attributeName mappedItemAttributes:(NSArray*)mappedItemAttributes objAttributes:(NSDictionary*)objAttributes
                      obj:(NSManagedObject*)obj convertedAttributes:(NSMutableDictionary*)convertedAttributes
 {
+    // Only process the key if it's in the remote dictionary, or if it's null (to persist null to the DB).
     NSString *remoteKey = [mappedItemAttributes objectAtIndex:kKernArrayIndexRemoteKey];
-    // only process key if it's in our provided set
-    if ([[objAttributes allKeys] containsObject:remoteKey]) {
+    if ([objAttributes isEqual:[NSNull null]] || ([objAttributes isKindOfClass:[NSDictionary class]] && [[objAttributes allKeys] containsObject:remoteKey])) {
         NSString *dataType = [mappedItemAttributes objectAtIndex:kKernArrayIndexDataType];
         
         id aValue = [objAttributes valueForKey:remoteKey];
