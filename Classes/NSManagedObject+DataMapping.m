@@ -378,9 +378,9 @@ NSUInteger kKernArrayIndexRelationshipBlock = 2;
     if ([objAttributes isEqual:[NSNull null]] || ([objAttributes isKindOfClass:[NSDictionary class]] && [[objAttributes allKeys] containsObject:remoteKey])) {
         NSString *dataType = [mappedItemAttributes objectAtIndex:kKernArrayIndexDataType];
         
-        id aValue = [objAttributes valueForKey:remoteKey];
+        id aValue = [objAttributes isKindOfClass:[NSDictionary class]] ? [objAttributes valueForKey:remoteKey] : nil;
         
-        if (aValue && ![aValue isEqual:[NSNull null]] && [dataType isEqualToString:KernDataTypeRelationshipBlock]) {
+        if ([dataType isEqualToString:KernDataTypeRelationshipBlock]) {
             [[Kern sharedContext].parentContext performBlockAndWait:^{
                 KernCoreDataRelationshipBlock blk = (KernCoreDataRelationshipBlock)[mappedItemAttributes objectAtIndex:kKernArrayIndexRelationshipBlock];
                 blk(obj, aValue, attributeName, remoteKey);
