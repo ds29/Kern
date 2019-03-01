@@ -28,7 +28,13 @@
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-    self.navigationItem.rightBarButtonItem = addButton;
+
+    UIBarButtonItem *importButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(importNewObject:)];
+
+    UIBarButtonItem *truncateButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(truncateAll:)];
+
+    NSArray *buttons = @[truncateButton, importButton, addButton];
+    self.navigationItem.rightBarButtonItems = buttons;
 }
 
 - (void)didReceiveMemoryWarning
@@ -37,19 +43,46 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)importNewObject:(id)sender
+{
+    NSDictionary *data = @{@"user": @{
+                                   @"id": [NSNumber numberWithInt:vt_randomIntInRange(1, 111)],
+                                   @"first_name": @"Remote",
+                                   @"last_name": @"Guy",
+                                   @"lucky_number": [NSNumber numberWithInt:vt_randomIntInRange(1, 111)],
+                                   @"timestamp": @"1970-01-01T00:00:00Z"
+                                   }
+                           };
+    User *user = [User updateOrCreateEntityUsingRemoteDictionary:data];
+    [user saveEntity];
+}
+
+- (void)truncateAll:(id)sender
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete All" message:@"Are you sure you want to delete all rows?" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:@"Delete All" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
+        [User truncateAll];
+    }];
+    
+    [alert addAction:deleteAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+
 - (void)insertNewObject:(id)sender
 {
     User *user = [User createEntity];
-
-/*
-    NSManagedObjectContext *context = [self.fetchedResultsController managedObjectContext];
-    NSEntityDescription *entity = [[self.fetchedResultsController fetchRequest] entity];
-    NSManagedObject *newManagedObject = [NSEntityDescription insertNewObjectForEntityForName:[entity name] inManagedObjectContext:context];
     
-    // If appropriate, configure the new managed object.
-    // Normally you should use accessor methods, but using KVC here avoids the need to add a custom class to the template.
-    User *user = (User*)newManagedObject;
-    */
+    /*
+     NSManagedObjectContext *context = [self.fetchedResultsController managedObjectContext];
+     NSEntityDescription *entity = [[self.fetchedResultsController fetchRequest] entity];
+     NSManagedObject *newManagedObject = [NSEntityDescription insertNewObjectForEntityForName:[entity name] inManagedObjectContext:context];
+     
+     // If appropriate, configure the new managed object.
+     // Normally you should use accessor methods, but using KVC here avoids the need to add a custom class to the template.
+     User *user = (User*)newManagedObject;
+     */
     user.timeStamp = [NSDate date];
     user.firstName = @"This";
     user.lastName = @"Guy";

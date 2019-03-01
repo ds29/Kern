@@ -32,7 +32,12 @@
 
     if (self.detailItem) {
         User *user = (User*)self.detailItem;
-        self.detailDescriptionLabel.text = [user.timeStamp description];
+        NSDateFormatter *formatter = [NSDateFormatter new];
+        formatter.dateStyle = NSDateFormatterMediumStyle;
+        formatter.timeStyle = NSDateFormatterLongStyle;
+        
+        NSString *formattedString = [NSString stringWithFormat:@"%@ %@ (%@)\n%@", user.firstName, user.lastName, user.luckyNumber, [formatter stringFromDate:user.timeStamp]];
+        self.detailDescriptionLabel.text = formattedString;
     }
 }
 

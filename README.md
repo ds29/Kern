@@ -124,17 +124,104 @@ Easy and powerful find/sort options.
 
 ```
 
-#### Importing Data
+#### Data Mapping
 
+One of the best features of Kern is the ability to do data mapping. We can easily import data from an NSDictionary (typically sourced from JSON) and store the result with by using predefined data map.
+
+For example, our User model implementation looks like this:
 ```obj-c
+# User.h
+#import <Foundation/Foundation.h>
+#import <CoreData/CoreData.h>
 
-	// TODO: Describe the process here.  (For now, you can look at the headers, example app, and tests.)
+@interface User : NSManagedObject
+
+@property (nonatomic, retain) NSNumber * remoteID;
+@property (nonatomic, retain) NSString * firstName;
+@property (nonatomic, retain) NSString * lastName;
+@property (nonatomic, retain) NSNumber * luckyNumber;
+@property (nonatomic, retain) NSDate * timeStamp;
+
+# User.m
+#import "User.h"
+#import <Kern.h>
+
+@implementation User
+
+@dynamic remoteID;
+@dynamic firstName;
+@dynamic lastName;
+@dynamic luckyNumber;
+@dynamic timeStamp;
+
++ (NSDictionary*)kern_mappedAttributes {
+	return @{
+		@"remoteID": @[@"id",KernDataTypeNumber,KernIsPrimaryKey],
+		@"firstName": @[@"first_name",KernDataTypeString],
+		@"lastName": @[@"last_name",KernDataTypeString],
+		@"luckyNumber": @[@"lucky_number",KernDataTypeNumber],
+		@"timeStamp": @[@"timestamp",KernDataTypeTime]
+	};
+}
+@end
+```
+The data mapping methods call into the `kern_mappedAttributes` to determine how to map input data to the Core Data model.
+
+Attributes are mapped using a key value pair of attribute name and the mapping array. The mapping array expects at least 2 elements: the JSON attribute name as string and the Kern data type value. If the attribute is the primary key, the third array element should specify. Each model should have a primary key.
+
+In the above example, we mapped the `remoteID` attribute of our Core Data model to the expected JSON attribute of `id` which is a `KernDataTypeNumber` and is the primary key (`KernIsPrimaryKey`).
+
+To illustrate, we'll continue on with the simplified example but rest assured that Kern is capable of mapping more complex relationships. Using `KernDataTypeRelationshipBlock`, you are able to define associations between models (see the lib for more).
+
+By way of demonstration, let's assume we've made an API call to get a user which returns the JSON below:
 
 ```
+GET /users/99
+```
+```json
+{
+	"id": 99,
+	"first_name": "Gob",
+	"last_name": "Bluth",
+	"lucky_number": 21,
+	"timestamp": "1970-01-01T00:00:00Z"
+}
+```
 
-## Requirements
+We can then parse this data and call our data mapping method to update or create
+the user. `updateOrCreateEntityUsingRemoteDictionary` takes in the dictionary and
+uses the data mapping defined in `kern_mappedAttributes`. If a record with the
+primary key already exists, it will find the record and update it. If it does not
+yet exist, it will be created. In either scenario, all of the attributes are
+automatically mapped and assigned for you reducing a lot of data type checking.
 
-It requires ARC and iOS 7+.  It's only for iOS.  *Ok, it may run on older/other OS requirements, but that's all it's built/tested against.*
+```obj-c
+  // Assume we've made the above API call and stored a resulting NSData object as data
+  NSError *jsonError;
+  NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+
+  if (jsonError) {
+      // handle error
+  } else {
+			// json parsed into NSDictionary that now looks like:
+			/*
+			@{
+        @"id": @99,
+        @"first_name": @"Gob",
+        @"last_name": @"Bluth",
+        @"lucky_number": @21,
+        @"timestamp": @"1970-01-01T00:00:00Z"
+    	}
+			*/
+			// Now we can easily import the data into our Core Data model with a simple call to
+			User *gob = [User updateOrCreateEntityUsingRemoteDictionary:json];
+			[gob saveEntity];
+  }
+```
+
+Kern also provides `updateOrCreateEntitiesUsingRemoteArray` to accomplish batch processing. Other method signatures allow you to provide a block which is performed on the object after it has been updated. This provides flexibility to perform additional operations when necessary (perhaps to set an associated object).
+
+The example project provided (`KernExampleApp`) contains a working example of data mapping, build and run the example to see it in action.
 
 ## Installation
 
@@ -150,4 +237,3 @@ Dustin Steele
 ## License
 
 Kern is available under the MIT license. See the LICENSE file for more info.
-

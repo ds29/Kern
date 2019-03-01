@@ -4,7 +4,6 @@ target "KernExampleApp" do
     pod "Kern", :path => "../Kern.podspec"
 end
 
-target "KernExampleAppTests", :exclusive => true do
+target "KernExampleAppTests" do
 	pod "Kern", :path => "../Kern.podspec"
 end
-
